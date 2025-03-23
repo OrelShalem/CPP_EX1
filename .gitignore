@@ -1,0 +1,49 @@
+# קבצים בינאריים / תוצרי קומפילציה
+*.o
+*.ko
+*.obj
+*.elf
+*.exe
+*.out
+*.app
+main
+test
+
+# קבצי ספריות
+*.so
+*.dylib
+*.dll
+*.lib
+*.a
+*.la
+*.lo
+
+# קבצי דיבאג
+*.dSYM/
+*.su
+core
+*.core
+
+# קבצי IDE ועורכי טקסט
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# תיקיות בניה
+/build/
+/debug/
+/release/
+/bin/
+/obj/
+
+# קבצי valgrind
+vgcore.*
+callgrind.out.*
+cachegrind.out.*
+massif.out.*
+
+# קבצים זמניים שנוצרים בזמן ריצה
+*.log
+*.tmp 
