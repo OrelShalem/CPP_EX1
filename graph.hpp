@@ -1,5 +1,9 @@
 // namespace graph(non-directed graph) with adjacency list (arrays)
 
+#include <iostream>
+#include <stdexcept>
+#include <new>
+
 namespace graph
 {
 
@@ -17,26 +21,46 @@ namespace graph
     // Graph class
     class Graph
     {
+    private:
         // function to allocate memory for the adjacency list
         Node *getAdjacencyList(int val, int weight, Node *head)
         {
-            Node *newNode = new Node;
+            // allocate memory for the new node
+            Node *newNode = new (std::nothrow) Node;
+            if (!newNode)
+                throw std::bad_alloc();
+
             newNode->val = val;
             newNode->cost = weight;
             // point the new node to the head of the adjacency list
             newNode->next = head;
             return newNode;
         }
-
-    private:
-        // number of vertices
-        int numVertices;
+        // constant number of vertices
+        const int numVertices;
 
     public:
         // adjacency list
         Node **head;
 
-        // constructor
+        // constructors
+        Graph(int numVertices) : numVertices(numVertices)
+        {
+            // check if numVertices is valid
+            if (numVertices <= 0)
+                throw std::invalid_argument("Number of vertices must be greater than 0!");
+
+            // allocate memory for the adjacency list
+            this->head = new (std::nothrow) Node *[numVertices]();
+            if (!this->head)
+                throw std::bad_alloc();
+
+            for (int i = 0; i < numVertices; i++)
+            {
+                head[i] = nullptr;
+            }
+        }
+
         Graph(Edge edges[], int n, int numVertices);
 
         // destructor
@@ -50,6 +74,8 @@ namespace graph
 
         // remove an edge from the graph
         void removeEdge(int src, int dest);
+
+        int getNumVertices() const;
 
         // print the graph
         void print_graph(Node *ptr, int i);
