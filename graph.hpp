@@ -16,6 +16,9 @@ namespace graph
     struct Edge
     {
         int src, dest, weight;
+        Edge() : src(0), dest(0), weight(0) {}
+        Edge(int src, int dest, int weight) : src(src), dest(dest), weight(weight) {}
+        ~Edge() {}
     };
 
     // Graph class
@@ -38,11 +41,10 @@ namespace graph
         }
         // constant number of vertices
         const int numVertices;
-
-    public:
         // adjacency list
         Node **head;
 
+    public:
         // constructors
         Graph(int numVertices) : numVertices(numVertices)
         {
@@ -76,6 +78,9 @@ namespace graph
         void removeEdge(int src, int dest);
 
         int getNumVertices() const;
+
+        // get the adjacency list
+        Node *getHead(int src) const;
 
         // print the graph
         void print_graph(Node *ptr, int i);

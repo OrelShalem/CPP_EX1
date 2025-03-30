@@ -3,8 +3,8 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes
 
 # קבצי מקור
-SRCS = graph.cpp
-HEADERS = graph.hpp
+SRCS = graph.cpp UnionFind.cpp Queue.cpp PriorityQueue.cpp
+HEADERS = graph.hpp UnionFind.hpp Queue.hpp PriorityQueue.hpp
 
 # יעדים
 MAIN_TARGET = main
@@ -19,7 +19,7 @@ main: $(MAIN_TARGET).cpp $(SRCS) $(HEADERS)
 	./$(MAIN_TARGET)
 
 # קומפילציה והרצה של קובץ הבדיקות
-test: $(TEST_TARGET).cpp $(SRCS) $(HEADERS)
+test: $(TEST_TARGET).cpp $(SRCS) $(HEADERS) doctest.h
 	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_TARGET).cpp $(SRCS)
 	./$(TEST_TARGET)
 
@@ -27,8 +27,12 @@ test: $(TEST_TARGET).cpp $(SRCS) $(HEADERS)
 valgrind: $(MAIN_TARGET)
 	valgrind $(VALGRIND_FLAGS) ./$(MAIN_TARGET)
 
+# בדיקת זליגת זיכרון בטסטים
+valgrind-test: $(TEST_TARGET)
+	valgrind $(VALGRIND_FLAGS) ./$(TEST_TARGET)
+
 # ניקוי הפרויקט
 clean:
 	rm -f $(MAIN_TARGET) $(TEST_TARGET) *.o
 
-.PHONY: all main test valgrind clean
+.PHONY: all main test valgrind valgrind-test clean
