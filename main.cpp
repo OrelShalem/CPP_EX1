@@ -4,7 +4,14 @@
 
 using namespace graph;
 
-// פונקציה להדפסת כותרת מודגשת
+/**
+ * @brief Prints a formatted header with the given title
+ *
+ * Creates a visually distinct section header by surrounding the title
+ * with equal signs and centering it within a fixed width.
+ *
+ * @param title The title text to display in the header
+ */
 void printHeader(const std::string &title)
 {
     std::cout << "\n\n"
@@ -13,7 +20,14 @@ void printHeader(const std::string &title)
     std::cout << std::string(50, '=') << std::endl;
 }
 
-// יצירת גרף לדוגמה באופן אוטומטי - ללא צורך בקלט מהמשתמש
+/**
+ * @brief Creates a predefined example graph for demonstration
+ *
+ * Initializes a graph with 6 vertices and 9 edges with specific weights.
+ * This provides a consistent example for demonstrating the various graph algorithms.
+ *
+ * @return Graph A predefined graph with 6 vertices and 9 edges
+ */
 Graph createExampleGraph()
 {
     // יצירת גרף עם 6 צמתים
@@ -35,75 +49,99 @@ Graph createExampleGraph()
     return Graph(edges, numEdges, numVertices);
 }
 
-// פונקציה המאפשרת למשתמש ליצור גרף באמצעות קלט
+/**
+ * @brief Creates a user-defined graph through console input
+ *
+ * Prompts the user to enter the number of vertices and edges,
+ * and then collects information for each edge (source, destination, weight).
+ * Performs validation to ensure the graph is valid (no self-loops or duplicate edges).
+ *
+ * @return Graph A graph created based on user input
+ * @throws std::invalid_argument If the user provides invalid input
+ */
 Graph createUserGraph()
 {
     int numVertices;
 
     std::cout << "Enter number of vertices: ";
     std::cin >> numVertices;
+    if (numVertices <= 0)
+    {
+        throw std::invalid_argument("Invalid number of vertices!");
+    }
+
+    // יצירת גרף ריק עם מספר צמתים מוגדר
+    Graph graph(numVertices);
 
     std::cout << "Enter number of edges: ";
     int numEdges;
     std::cin >> numEdges;
-
-    Edge *edges = new Edge[numEdges];
-    int validEdges = 0; // מעקב אחר מספר הקשתות התקינות
+    if (numEdges <= 0)
+    {
+        throw std::invalid_argument("Invalid number of edges!");
+    }
 
     std::cout << "\nFor each edge enter: source vertex, destination vertex, weight\n";
     for (int i = 0; i < numEdges; i++)
     {
+        int src, dest, weight;
         std::cout << "Edge " << i + 1 << ": ";
-        std::cin >> edges[i].src >> edges[i].dest >> edges[i].weight;
+        std::cin >> src >> dest >> weight;
 
-        // בדיקת תקינות - בדיקת מספרי הצמתים
-        if (edges[i].src >= numVertices || edges[i].dest >= numVertices ||
-            edges[i].src < 0 || edges[i].dest < 0)
+        // נבצע תחילה את הבדיקות שאינן כלולות ב-addEdge
+        // או כאלה שברצוננו לתת למשתמש שגיאה ספציפית לגביהן
+
+        // בדיקת תקינות מספרי צמתים
+        if (src >= numVertices || dest >= numVertices || src < 0 || dest < 0)
         {
             std::cout << "Invalid vertex numbers! Vertices should be between 0 and "
                       << numVertices - 1 << std::endl;
-            i--; // נסה שוב עם אותו מיקום במערך
+            i--; // נסה שוב
             continue;
         }
 
         // בדיקת לולאות עצמיות
-        if (edges[i].src == edges[i].dest)
+        if (src == dest)
         {
             std::cout << "Self-loops are not allowed in a simple graph! Please try again." << std::endl;
-            i--; // נסה שוב עם אותו מיקום במערך
+            i--; // נסה שוב
             continue;
         }
 
         // בדיקת קשתות כפולות
-        bool isDuplicate = false;
-        for (int j = 0; j < validEdges; j++)
+        if (graph.hasEdge(src, dest))
         {
-            if ((edges[j].src == edges[i].src && edges[j].dest == edges[i].dest) ||
-                (edges[j].src == edges[i].dest && edges[j].dest == edges[i].src))
-            {
-                std::cout << "Duplicate edge detected! A simple graph cannot have multiple edges between the same vertices." << std::endl;
-                isDuplicate = true;
-                break;
-            }
-        }
-
-        if (isDuplicate)
-        {
-            i--; // נסה שוב עם אותו מיקום במערך
+            std::cout << "Duplicate edge detected! A simple graph cannot have multiple edges between the same vertices." << std::endl;
+            i--; // נסה שוב
             continue;
         }
 
-        // אם הגענו לכאן, הקשת תקינה
-        validEdges++;
+        // אם הגענו לכאן, הקשת תקינה ואפשר להוסיף אותה לגרף
+        try
+        {
+            graph.addEdge(src, dest, weight);
+        }
+        catch (const std::exception &e)
+        {
+            // למקרה שהפונקציה addEdge תזרוק חריגה שלא צפינו
+            std::cout << "Error adding edge: " << e.what() << ". Please try again." << std::endl;
+            i--; // נסה שוב
+            continue;
+        }
     }
-
-    // יצירת הגרף
-    Graph graph(edges, validEdges, numVertices);
-    delete[] edges;
 
     return graph;
 }
 
+/**
+ * @brief Main function that demonstrates the graph algorithms
+ *
+ * Provides a menu for the user to choose between a predefined example graph
+ * or creating their own graph. Then runs all the graph algorithms (BFS, DFS,
+ * Dijkstra, Prim, and Kruskal) on the selected graph and displays the results.
+ *
+ * @return int Exit status code (0 for success, 1 for error)
+ */
 int main()
 {
     std::cout << "Graph Algorithms Demonstration" << std::endl;
@@ -115,6 +153,12 @@ int main()
     std::cout << "2. Create your own graph" << std::endl;
     std::cout << "Your choice: ";
     std::cin >> choice;
+
+    if (choice != 1 && choice != 2)
+    {
+        std::cerr << "Invalid choice! Please try again." << std::endl;
+        return 1;
+    }
 
     Graph graph = (choice == 1) ? createExampleGraph() : createUserGraph();
 
@@ -190,42 +234,42 @@ int main()
             kruskalResult.print_graph(kruskalResult.getHead(i), i);
         }
 
-        // בדיקת הוספה והסרה של קשתות
-        printHeader("EDGE OPERATIONS");
-        std::cout << "Demonstrating edge operations:" << std::endl;
+        // // בדיקת הוספה והסרה של קשתות
+        // printHeader("EDGE OPERATIONS");
+        // std::cout << "Demonstrating edge operations:" << std::endl;
 
-        // העתקת הגרף המקורי
-        Graph testGraph = createExampleGraph();
+        // // העתקת הגרף המקורי
+        // Graph testGraph = createExampleGraph();
 
-        // הדפסת הגרף המקורי
-        std::cout << "Original graph:" << std::endl;
-        for (int i = 0; i < testGraph.getNumVertices(); i++)
-        {
-            testGraph.print_graph(testGraph.getHead(i), i);
-        }
+        // // הדפסת הגרף המקורי
+        // std::cout << "Original graph:" << std::endl;
+        // for (int i = 0; i < testGraph.getNumVertices(); i++)
+        // {
+        //     testGraph.print_graph(testGraph.getHead(i), i);
+        // }
 
-        // הוספת קשת חדשה
-        std::cout << "\nAdding edge from 0 to 5 with weight 10:" << std::endl;
-        testGraph.addEdge(0, 5, 10);
-        std::cout << "After adding edge:" << std::endl;
-        for (int i = 0; i < testGraph.getNumVertices(); i++)
-        {
-            testGraph.print_graph(testGraph.getHead(i), i);
-        }
+        // // הוספת קשת חדשה
+        // std::cout << "\nAdding edge from 0 to 5 with weight 10:" << std::endl;
+        // testGraph.addEdge(0, 5, 10);
+        // std::cout << "After adding edge:" << std::endl;
+        // for (int i = 0; i < testGraph.getNumVertices(); i++)
+        // {
+        //     testGraph.print_graph(testGraph.getHead(i), i);
+        // }
 
-        // הסרת קשת
-        std::cout << "\nRemoving edge between 0 and 1:" << std::endl;
-        testGraph.removeEdge(0, 1);
-        std::cout << "After removing edge:" << std::endl;
-        for (int i = 0; i < testGraph.getNumVertices(); i++)
-        {
-            testGraph.print_graph(testGraph.getHead(i), i);
-        }
+        // // הסרת קשת
+        // std::cout << "\nRemoving edge between 0 and 1:" << std::endl;
+        // testGraph.removeEdge(0, 1);
+        // std::cout << "After removing edge:" << std::endl;
+        // for (int i = 0; i < testGraph.getNumVertices(); i++)
+        // {
+        //     testGraph.print_graph(testGraph.getHead(i), i);
+        // }
 
-        // בדיקת קיום קשת
-        std::cout << "\nChecking if edges exist:" << std::endl;
-        std::cout << "Edge 0-2 exists: " << (testGraph.hasEdge(0, 2) ? "Yes" : "No") << std::endl;
-        std::cout << "Edge 0-1 exists: " << (testGraph.hasEdge(0, 1) ? "Yes" : "No") << std::endl;
+        // // בדיקת קיום קשת
+        // std::cout << "\nChecking if edges exist:" << std::endl;
+        // std::cout << "Edge 0-2 exists: " << (testGraph.hasEdge(0, 2) ? "Yes" : "No") << std::endl;
+        // std::cout << "Edge 0-1 exists: " << (testGraph.hasEdge(0, 1) ? "Yes" : "No") << std::endl;
     }
     catch (const std::exception &e)
     {

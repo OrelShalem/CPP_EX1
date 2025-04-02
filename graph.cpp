@@ -7,9 +7,18 @@
 
 namespace graph
 {
-
-    // constructor
-    Graph::Graph(Edge edges[], int n, int numVertices) : numVertices(numVertices)
+    /**
+     * @brief Constructor for creating a graph from an array of edges
+     *
+     * This constructor initializes a graph with the given number of vertices
+     * and adds the edges provided in the array. It handles self-loops and
+     * duplicate edges by issuing warnings and ignoring them.
+     *
+     * @param edges Array of edges to be added to the graph
+     * @param n Number of edges in the array
+     * @param numVertices Number of vertices in the graph
+     */
+    Graph::Graph(Edge edges[], int n, int numVertices) : numVertices(numVertices), numEdges(0)
     {
         this->head = new Node *[numVertices]();
 
@@ -24,33 +33,25 @@ namespace graph
             int dest = edges[i].dest;
             int weight = edges[i].weight;
 
-            // Check for self-loop (vertex connected to itself)
-            if (src == dest)
+            try
             {
-                std::cout << "Warning: Self-loop detected at vertex " << src << ". Ignoring." << std::endl;
-                continue;
+                // שימוש ב-addEdge במקום להוסיף ישירות לרשימה
+                addEdge(src, dest, weight);
             }
-
-            // Check for duplicate edge
-            if (hasEdge(src, dest))
+            catch (const std::invalid_argument &e)
             {
-                std::cout << "Warning: Duplicate edge detected between " << src << " and "
-                          << dest << ". Ignoring." << std::endl;
-                continue;
+                // אם addEdge זורק חריגה, נדפיס אזהרה ונמשיך
+                std::cout << "Warning: " << e.what() << std::endl;
             }
-
-            // add an edge from src to dest
-            // 0 -> 1
-            Node *newNode = getAdjacencyList(dest, weight, head[src]);
-            head[src] = newNode;
-
-            // undirected graph
-            // 1 -> 0
-            newNode = getAdjacencyList(src, weight, head[dest]);
-            head[dest] = newNode;
         }
     }
 
+    /**
+     * @brief Destructor for the Graph class
+     *
+     * Frees all dynamically allocated memory for the adjacency lists
+     * and the head array itself.
+     */
     Graph::~Graph()
     {
         for (int i = 0; i < numVertices; i++)
@@ -66,6 +67,18 @@ namespace graph
         delete[] head;
     }
 
+    /**
+     * @brief Checks if an edge exists between two vertices
+     *
+     * Validates the vertices and then traverses the adjacency list
+     * of the source vertex to find a node with the destination vertex value.
+     *
+     * @param src Source vertex
+     * @param dest Destination vertex
+     * @return true If the edge exists
+     * @return false If the edge doesn't exist
+     * @throws std::invalid_argument If either vertex is out of range
+     */
     bool Graph::hasEdge(int src, int dest) const
     {
         // check if src and dest are valid vertices
@@ -84,6 +97,18 @@ namespace graph
         return false;
     }
 
+    /**
+     * @brief Adds an edge between two vertices
+     *
+     * Validates the vertices, checks for self-loops and duplicate edges,
+     * then adds the edge to the adjacency lists of both vertices (since this is an undirected graph).
+     * Increments the edge count.
+     *
+     * @param src Source vertex
+     * @param dest Destination vertex
+     * @param weight Weight of the edge (default: 1)
+     * @throws std::invalid_argument If vertices are invalid, if it's a self-loop, or if the edge already exists
+     */
     void Graph::addEdge(int src, int dest, int weight)
     {
         // check if src and dest are valid vertices
@@ -110,8 +135,21 @@ namespace graph
         // undirected graph
         newNode = getAdjacencyList(src, weight, head[dest]);
         head[dest] = newNode;
+
+        numEdges++;
     }
 
+    /**
+     * @brief Removes an edge between two vertices
+     *
+     * Validates the vertices, checks if the edge exists, then
+     * removes the edge from the adjacency lists of both vertices.
+     * Decrements the edge count.
+     *
+     * @param src Source vertex
+     * @param dest Destination vertex
+     * @throws std::invalid_argument If vertices are invalid or if the edge doesn't exist
+     */
     void Graph::removeEdge(int src, int dest)
     {
         // check if src and dest are valid vertices
@@ -161,14 +199,37 @@ namespace graph
             prev = current;
             current = current->next;
         }
+
+        numEdges--;
     }
 
-    // get number of vertices in the graph (constant)
+    /**
+     * @brief Gets the number of vertices in the graph
+     *
+     * @return int Number of vertices
+     */
     int Graph::getNumVertices() const
     {
         return numVertices;
     }
 
+    /**
+     * @brief Gets the number of edges in the graph
+     *
+     * @return int Number of edges
+     */
+    int Graph::getNumEdges() const
+    {
+        return numEdges;
+    }
+
+    /**
+     * @brief Gets the head of the adjacency list for a vertex
+     *
+     * @param src Source vertex
+     * @return Node* Pointer to the head of the adjacency list
+     * @throws std::invalid_argument If the vertex is invalid
+     */
     Node *Graph::getHead(int src) const
     {
         if (src >= getNumVertices() || src < 0)
@@ -176,6 +237,15 @@ namespace graph
         return head[src];
     }
 
+    /**
+     * @brief Prints the adjacency list for a vertex
+     *
+     * Displays the vertex and all its neighbors along with edge weights.
+     *
+     * @param ptr Pointer to the head of the adjacency list
+     * @param i Vertex index
+     * @throws std::invalid_argument If the vertex is invalid
+     */
     void Graph::print_graph(Node *ptr, int i)
     {
         if (i >= getNumVertices() || i < 0)
@@ -201,7 +271,17 @@ namespace graph
                   << std::endl;
     }
 
-    // מימוש אלגוריתם BFS
+    /**
+     * @brief Breadth-First Search algorithm implementation
+     *
+     * Performs a BFS traversal starting from the given vertex and
+     * constructs a tree representing the BFS traversal.
+     *
+     * @param graph The input graph
+     * @param start The starting vertex
+     * @return Graph A tree representing the BFS traversal
+     * @throws std::invalid_argument If the start vertex is invalid
+     */
     Graph Algorithms::bfs(const Graph &graph, int start)
     {
         int numVertices = graph.getNumVertices();
@@ -218,38 +298,44 @@ namespace graph
         // מערך לסימון צמתים שכבר ביקרנו בהם
         bool *visited = new bool[numVertices]();
 
-        // יצירת תור לאלגוריתם BFS
+        // תור לאחסון הצמתים שנגלו אך טרם נבדקו
         Queue q(numVertices);
 
-        // מסמנים את צומת ההתחלה כמבוקר ומכניסים לתור
+        // סימון צומת ההתחלה כמבוקר
         visited[start] = true;
+
+        // הכנסת צומת ההתחלה לתור
         q.enqueue(start);
 
-        // מבצעים BFS
+        // כל עוד התור לא ריק
         while (!q.isEmpty())
         {
-            // מוציאים צומת מהתור
-            int current = q.dequeue();
+            // הוצאת צומת מהתור
+            int u = q.dequeue();
 
-            // עוברים על כל השכנים של הצומת הנוכחי
-            Node *neighbor = graph.getHead(current);
+            // קבלת רשימת השכנים של הצומת
+            Node *neighbor = graph.getHead(u);
+
+            // עבור כל שכן
             while (neighbor != nullptr)
             {
-                int adjVertex = neighbor->val;
+                int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם לא ביקרנו בשכן זה עדיין
-                if (!visited[adjVertex])
+                // אם השכן טרם בוקר
+                if (!visited[v])
                 {
-                    // מוסיפים קשת לגרף התוצאה
-                    result.addEdge(current, adjVertex, weight);
+                    // סימון השכן כמבוקר
+                    visited[v] = true;
 
-                    // מסמנים את השכן כמבוקר ומכניסים לתור
-                    visited[adjVertex] = true;
-                    q.enqueue(adjVertex);
+                    // הוספת קשת לגרף התוצאה
+                    result.addEdge(u, v, weight);
+
+                    // הכנסת השכן לתור
+                    q.enqueue(v);
                 }
 
-                // ממשיכים לשכן הבא
+                // מעבר לשכן הבא
                 neighbor = neighbor->next;
             }
         }
@@ -260,42 +346,65 @@ namespace graph
         return result;
     }
 
-    // פונקציית עזר לאלגוריתם DFS
-    void dfsUtil(const Graph &graph, int vertex, bool *visited, Graph &result, int parent)
+    /**
+     * @brief Utility function for DFS traversal
+     *
+     * Helper function for the DFS algorithm that recursively visits
+     * vertices and constructs the DFS tree.
+     *
+     * @param graph The input graph
+     * @param u Current vertex being visited
+     * @param visited Array to track visited vertices
+     * @param result Graph representing the DFS tree
+     * @param parent Parent vertex of the current vertex
+     */
+    void dfsUtil(const Graph &graph, int u, bool visited[], Graph &result, int parent)
     {
-        // מסמנים את הצומת הנוכחי כמבוקר
-        visited[vertex] = true;
+        // סימון הצומת הנוכחי כמבוקר
+        visited[u] = true;
 
-        // עוברים על כל השכנים של הצומת הנוכחי
-        Node *neighbor = graph.getHead(vertex);
+        // קבלת רשימת השכנים של הצומת
+        Node *neighbor = graph.getHead(u);
+
+        // עבור כל שכן
         while (neighbor != nullptr)
         {
-            int adjVertex = neighbor->val;
+            int v = neighbor->val;
             int weight = neighbor->cost;
 
-            // אם לא ביקרנו בשכן זה עדיין
-            if (!visited[adjVertex])
+            // אם השכן טרם בוקר
+            if (!visited[v])
             {
-                // מוסיפים קשת לגרף התוצאה
-                result.addEdge(vertex, adjVertex, weight);
+                // הוספת קשת לגרף התוצאה
+                result.addEdge(u, v, weight);
 
-                // קריאה רקורסיבית לשכן
-                dfsUtil(graph, adjVertex, visited, result, vertex);
+                // קריאה רקורסיבית לשכן - מעביר את הצומת הנוכחי כהורה
+                dfsUtil(graph, v, visited, result, u);
             }
-            // ניתן להוסיף בדיקה כאן אם רוצים לטפל בקשתות אחורה
-            // בדיקה זו יכולה להשתמש בפרמטר parent כדי להימנע מספירת קשת הדדית כמו קשת אחורה
-            else if (adjVertex != parent)
+            // מונע הוספת קשת חזרה להורה (אם זהו גרף לא מכוון)
+            // אם השכן הוא ההורה של הצומת הנוכחי, נדלג עליו
+            else if (v != parent)
             {
-                // קשת אחורה נמצאה (לא משנים את גרף התוצאה עבור קשתות אחורה)
-                // std::cout << "Back edge from " << vertex << " to " << adjVertex << std::endl;
+                // כאן ניתן להוסיף לוגיקה נוספת אם נרצה לטפל בקשתות אחורה
+                // לדוגמה: זיהוי מעגלים
             }
 
-            // ממשיכים לשכן הבא
+            // מעבר לשכן הבא
             neighbor = neighbor->next;
         }
     }
 
-    // מימוש אלגוריתם DFS
+    /**
+     * @brief Depth-First Search algorithm implementation
+     *
+     * Performs a DFS traversal starting from the given vertex and
+     * constructs a tree representing the DFS traversal.
+     *
+     * @param graph The input graph
+     * @param start The starting vertex
+     * @return Graph A tree representing the DFS traversal
+     * @throws std::invalid_argument If the start vertex is invalid
+     */
     Graph Algorithms::dfs(const Graph &graph, int start)
     {
         int numVertices = graph.getNumVertices();
@@ -321,7 +430,18 @@ namespace graph
         return result;
     }
 
-    // מימוש אלגוריתם דייקסטרה
+    /**
+     * @brief Dijkstra's algorithm for finding shortest paths
+     *
+     * Implements Dijkstra's algorithm to find the shortest paths from
+     * a given source vertex to all other vertices in the graph.
+     * Returns a tree representing these shortest paths.
+     *
+     * @param graph The input graph
+     * @param start The starting vertex
+     * @return Graph A tree representing the shortest paths
+     * @throws std::invalid_argument If the start vertex is invalid
+     */
     Graph Algorithms::dijkstra(const Graph &graph, int start)
     {
         int numVertices = graph.getNumVertices();
@@ -371,8 +491,15 @@ namespace graph
             if (finalized[u])
                 continue;
 
-            // מסמנים את הצומת כמסתיים
+            // מסמנים שסיימנו עם צומת זה
             finalized[u] = true;
+
+            // אם יש להורה, מוסיפים את הקשת לגרף התוצאה
+            if (parent[u] != -1)
+            {
+                // המשקל הוא מרחק הצומת ולא משקל הקשת המקורי!
+                result.addEdge(parent[u], u, distance[u] - distance[parent[u]]);
+            }
 
             // עוברים על כל השכנים של הצומת הנוכחי
             Node *neighbor = graph.getHead(u);
@@ -381,7 +508,7 @@ namespace graph
                 int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם מצאנו מסלול קצר יותר
+                // אם השכן טרם סיומי ויש מסלול קצר יותר דרך צומת u
                 if (!finalized[v] && distance[u] != INT_MAX &&
                     distance[u] + weight < distance[v])
                 {
@@ -400,18 +527,6 @@ namespace graph
             }
         }
 
-        // בניית גרף התוצאה מעץ המסלולים הקצרים ביותר
-        for (int i = 0; i < numVertices; i++)
-        {
-            if (i != start && parent[i] != -1 && distance[i] != INT_MAX)
-            {
-                // מוסיפים קשת מההורה לצומת הנוכחי
-                // המשקל של הקשת הוא ההפרש במרחקים
-                int edgeWeight = distance[i] - distance[parent[i]];
-                result.addEdge(parent[i], i, edgeWeight);
-            }
-        }
-
         // שחרור זיכרון
         delete[] distance;
         delete[] finalized;
@@ -420,9 +535,24 @@ namespace graph
         return result;
     }
 
-    // מימוש אלגוריתם פרים
+    /**
+     * @brief Prim's algorithm for finding Minimum Spanning Tree
+     *
+     * Implements Prim's algorithm to find a Minimum Spanning Tree (MST)
+     * of the given graph. Requires at least n-1 edges to form an MST.
+     *
+     * @param graph The input graph
+     * @return Graph A tree representing the MST
+     * @throws std::runtime_error If the graph doesn't have at least n-1 edges
+     */
     Graph Algorithms::prim(const Graph &graph)
     {
+        // throw an error if the graph has not has at least n-1 edges
+        if (graph.getNumEdges() < graph.getNumVertices() - 1)
+        {
+            throw std::runtime_error("Graph does not have at least n-1 edges!");
+        }
+
         int numVertices = graph.getNumVertices();
 
         // יצירת גרף תוצאה ריק
@@ -506,9 +636,25 @@ namespace graph
         return result;
     }
 
-    // מימוש אלגוריתם קרוסקל
+    /**
+     * @brief Kruskal's algorithm for finding Minimum Spanning Tree
+     *
+     * Implements Kruskal's algorithm to find a Minimum Spanning Tree (MST)
+     * of the given graph. Requires at least n-1 edges to form an MST.
+     * Uses Union-Find data structure for cycle detection.
+     *
+     * @param graph The input graph
+     * @return Graph A tree representing the MST
+     * @throws std::runtime_error If the graph doesn't have at least n-1 edges
+     */
     Graph Algorithms::kruskal(const Graph &graph)
     {
+        // throw an error if the graph has not has at least n-1 edges
+        if (graph.getNumEdges() < graph.getNumVertices() - 1)
+        {
+            throw std::runtime_error("Graph does not have at least n-1 edges!");
+        }
+
         int numVertices = graph.getNumVertices();
 
         // יצירת גרף תוצאה ריק
@@ -581,4 +727,36 @@ namespace graph
 
         return result;
     }
+
+    // bool Algorithms::isConnected(const Graph &graph)
+    // {
+    //     int numVertices = graph.getNumVertices();
+
+    //     // יצירת גרף תוצאה ריק
+    //     Graph result(numVertices);
+
+    //     // מערך לסימון צמתים שכבר ביקרנו בהם
+    //     bool *visited = new bool[numVertices]();
+
+    //     // מבצעים DFS מצומת ההתחלה
+    //     dfsUtil(graph, 0, visited, result, -1);
+
+    //     // בדיקה אם כל הצמתים נכללו בעץ
+    //     for (int i = 0; i < numVertices; i++)
+    //     {
+    //         if (!visited[i])
+    //         {
+    //             std::cout << "Graph is not connected!" << std::endl;
+    //             // שחרור זיכרון
+    //             delete[] visited;
+    //             return false;
+    //         }
+    //     }
+
+    //     // שחרור זיכרון
+    //     delete[] visited;
+
+    //     std::cout << "Graph is connected!" << std::endl;
+    //     return true;
+    // }
 }

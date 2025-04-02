@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
-VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
+VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind.log
 
 # קבצי מקור
 SRCS = graph.cpp UnionFind.cpp Queue.cpp PriorityQueue.cpp
