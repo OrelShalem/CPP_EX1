@@ -196,33 +196,33 @@ TEST_CASE("Testing exception handling")
     CHECK_EQ(g.getNumVertices(), 2);
 }
 
-// בדיקות לאלגוריתם BFS
+// Testing BFS algorithm
 TEST_CASE("Testing BFS algorithm")
 {
-    // יצירת גרף מבחן בסיסי
+    // Creating a basic test graph
     Edge edges[] = {{0, 1, 1}, {0, 2, 2}, {1, 3, 3}, {2, 3, 4}, {3, 4, 5}};
     Graph g(edges, 5, 5);
 
-    // בדיקת BFS מצומת ההתחלה 0
+    // Testing BFS from start vertex 0
     Graph bfsResult = Algorithms::bfs(g, 0);
 
-    // בדיקה שהתוצאה היא עץ (ללא מעגלים)
+    // Checking that the result is a tree (no cycles)
     CHECK(bfsResult.hasEdge(0, 1));
     CHECK(bfsResult.hasEdge(0, 2));
 
-    // בדיקה שרק אחד מהמסלולים נבחר (לא שניהם)
+    // Checking that only one of the paths is chosen (not both)
     bool hasEdge1_3 = bfsResult.hasEdge(1, 3);
     bool hasEdge2_3 = bfsResult.hasEdge(2, 3);
-    CHECK((hasEdge1_3 || hasEdge2_3));       // לפחות אחד מהם חייב להיות נכון
-    CHECK_FALSE((hasEdge1_3 && hasEdge2_3)); // אבל לא שניהם יחד
+    CHECK((hasEdge1_3 || hasEdge2_3));       // At least one must be true
+    CHECK_FALSE((hasEdge1_3 && hasEdge2_3)); // But not both together
 
     CHECK(bfsResult.hasEdge(3, 4));
 
-    // בדיקת מקרי קצה - גרף ריק
+    // Testing edge cases - empty graph
     Graph emptyGraph(3);
     Graph emptyBfsResult = Algorithms::bfs(emptyGraph, 0);
 
-    // בגרף ריק, ה-BFS לא יוצר קשתות כלל
+    // In an empty graph, BFS doesn't create any edges
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -234,19 +234,19 @@ TEST_CASE("Testing BFS algorithm")
         }
     }
 
-    // בדיקת מקרה קצה - צומת התחלה שגוי
-    CHECK_THROWS_AS(Algorithms::bfs(g, -1), std::invalid_argument); // צומת שלילי
-    CHECK_THROWS_AS(Algorithms::bfs(g, 5), std::invalid_argument);  // צומת מחוץ לטווח
+    // Testing edge case - invalid start vertex
+    CHECK_THROWS_AS(Algorithms::bfs(g, -1), std::invalid_argument); // Negative vertex
+    CHECK_THROWS_AS(Algorithms::bfs(g, 5), std::invalid_argument);  // Vertex out of range
 
-    // בדיקת גרף עם רכיב קשירות אחד
+    // Testing graph with one connected component
     Graph disconnectedGraph(5);
     disconnectedGraph.addEdge(0, 1, 1);
     disconnectedGraph.addEdge(1, 2, 2);
-    // צמתים 3 ו-4 מנותקים
+    // Vertices 3 and 4 are disconnected
 
     Graph disconnectedBfs = Algorithms::bfs(disconnectedGraph, 0);
 
-    // בדיקה שרק הצמתים המחוברים נמצאים בתוצאת ה-BFS
+    // Checking that only connected vertices are in the BFS result
     CHECK(disconnectedBfs.hasEdge(0, 1));
     CHECK(disconnectedBfs.hasEdge(1, 2));
     CHECK_FALSE(disconnectedBfs.hasEdge(0, 3));
@@ -255,29 +255,29 @@ TEST_CASE("Testing BFS algorithm")
     CHECK_FALSE(disconnectedBfs.hasEdge(2, 3));
     CHECK_FALSE(disconnectedBfs.hasEdge(2, 4));
 
-    // בדיקת גרף עם צומת בודד
+    // Testing graph with a single vertex
     Graph singleVertex(1);
     Graph singleBfs = Algorithms::bfs(singleVertex, 0);
     CHECK_EQ(singleBfs.getNumVertices(), 1);
 
-    // בדיקת שצומת ההתחלה בממש קיים ברכיב קשירות אחר
+    // Testing start vertex in a different connected component
     Graph startFromDisconnected = Algorithms::bfs(disconnectedGraph, 3);
     CHECK_FALSE(startFromDisconnected.hasEdge(3, 0));
     CHECK_FALSE(startFromDisconnected.hasEdge(3, 1));
     CHECK_FALSE(startFromDisconnected.hasEdge(3, 2));
 }
 
-// בדיקות לאלגוריתם DFS
+// Testing DFS algorithm
 TEST_CASE("Testing DFS algorithm")
 {
-    // יצירת גרף מבחן בסיסי
+    // Creating a basic test graph
     Edge edges[] = {{0, 1, 1}, {0, 2, 2}, {1, 3, 3}, {2, 3, 4}, {3, 4, 5}};
     Graph g(edges, 5, 5);
 
-    // בדיקת DFS מצומת ההתחלה 0
+    // Testing DFS from start vertex 0
     Graph dfsResult = Algorithms::dfs(g, 0);
 
-    // בדיקה שהתוצאה היא עץ (ללא מעגלים)
+    // Checking that the result is a tree (correct number of edges)
     int edgeCount = 0;
     for (int i = 0; i < g.getNumVertices(); i++)
     {
@@ -288,13 +288,13 @@ TEST_CASE("Testing DFS algorithm")
             head = head->next;
         }
     }
-    // כיוון שזה גרף לא מכוון, כל קשת נספרת פעמיים
-    CHECK_EQ(edgeCount, (g.getNumVertices() - 1) * 2); // מספר הקשתות בעץ
+    // Since it's an undirected graph, each edge is counted twice
+    CHECK_EQ(edgeCount, (g.getNumVertices() - 1) * 2); // Number of edges in a tree
 
-    // בדיקה שכל הצמתים מחוברים
+    // Checking that all vertices are connected
     bool reachable[5] = {false};
 
-    // סימון הצמתים שניתן להגיע אליהם מצומת 0
+    // Mark vertices reachable from vertex 0
     reachable[0] = true;
     Node *neighbors = dfsResult.getHead(0);
     while (neighbors != nullptr)
@@ -313,17 +313,17 @@ TEST_CASE("Testing DFS algorithm")
         }
     }
 
-    // בדיקה שכל הצמתים נגישים
+    // Checking that all vertices are reachable
     for (int i = 0; i < 5; i++)
     {
         CHECK(reachable[i]);
     }
 
-    // בדיקת מקרי קצה - גרף ריק
+    // Testing edge cases - empty graph
     Graph emptyGraph(3);
     Graph emptyDfsResult = Algorithms::dfs(emptyGraph, 0);
 
-    // בגרף ריק, ה-DFS לא יוצר קשתות כלל
+    // In an empty graph, DFS doesn't create any edges
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -335,38 +335,38 @@ TEST_CASE("Testing DFS algorithm")
         }
     }
 
-    // בדיקת מקרה קצה - צומת התחלה שגוי
-    CHECK_THROWS_AS(Algorithms::dfs(g, -1), std::invalid_argument); // צומת שלילי
-    CHECK_THROWS_AS(Algorithms::dfs(g, 5), std::invalid_argument);  // צומת מחוץ לטווח
+    // Testing edge case - invalid start vertex
+    CHECK_THROWS_AS(Algorithms::dfs(g, -1), std::invalid_argument); // Negative vertex
+    CHECK_THROWS_AS(Algorithms::dfs(g, 5), std::invalid_argument);  // Vertex out of range
 
-    // בדיקת גרף לא קשיר
+    // Testing disconnected graph
     Graph disconnectedGraph(5);
     disconnectedGraph.addEdge(0, 1, 1);
     disconnectedGraph.addEdge(1, 2, 2);
-    disconnectedGraph.addEdge(3, 4, 3); // רכיב קשירות נפרד
+    disconnectedGraph.addEdge(3, 4, 3); // Separate connected component
 
     Graph disconnectedDfs = Algorithms::dfs(disconnectedGraph, 0);
 
-    // בדיקה שרק הצמתים בחלק המחובר מופיעים בתוצאה
+    // Checking that only vertices in the connected component appear in the result
     CHECK(disconnectedDfs.hasEdge(0, 1));
     CHECK(disconnectedDfs.hasEdge(1, 2));
     CHECK_FALSE(disconnectedDfs.hasEdge(0, 3));
     CHECK_FALSE(disconnectedDfs.hasEdge(0, 4));
     CHECK_FALSE(disconnectedDfs.hasEdge(1, 3));
     CHECK_FALSE(disconnectedDfs.hasEdge(2, 3));
-    CHECK_FALSE(disconnectedDfs.hasEdge(3, 4)); // הקשת הזו לא אמורה להיות בתוצאות ה-DFS שמתחיל מ-0
+    CHECK_FALSE(disconnectedDfs.hasEdge(3, 4)); // This edge shouldn't be in DFS results starting from 0
 
-    // בדיקת DFS מהרכיב האחר
+    // Testing DFS from the other component
     Graph otherComponentDfs = Algorithms::dfs(disconnectedGraph, 3);
     CHECK_FALSE(otherComponentDfs.hasEdge(3, 0));
     CHECK_FALSE(otherComponentDfs.hasEdge(3, 2));
     CHECK(otherComponentDfs.hasEdge(3, 4));
 }
 
-// בדיקות לאלגוריתם דייקסטרה
+// Testing Dijkstra algorithm
 TEST_CASE("Testing Dijkstra algorithm")
 {
-    // יצירת גרף מבחן עם משקלים
+    // Creating a test graph with weights
     Edge edges[] = {
         {0, 1, 4},
         {0, 2, 3},
@@ -375,24 +375,24 @@ TEST_CASE("Testing Dijkstra algorithm")
         {2, 3, 7}};
     Graph g(edges, 5, 4);
 
-    // בדיקת דייקסטרה מצומת ההתחלה 0
+    // Testing Dijkstra from start vertex 0
     Graph dijkstraResult = Algorithms::dijkstra(g, 0);
 
-    // בדיקה שהתוצאה היא עץ המסלולים הקצרים ביותר
-    // מסלול מ-0 ל-1 ישירות
+    // Checking that the result is a shortest path tree
+    // Path from 0 to 1 directly
     CHECK(dijkstraResult.hasEdge(0, 1));
 
-    // מסלול מ-0 ל-2 ישירות
+    // Path from 0 to 2 directly
     CHECK(dijkstraResult.hasEdge(0, 2));
 
-    // מסלול מ-0 ל-3 דרך 1 או דרך 2
+    // Path from 0 to 3 either through 1 or through 2
     bool validPathTo3 = (dijkstraResult.hasEdge(1, 3) || dijkstraResult.hasEdge(2, 3));
     CHECK(validPathTo3);
 
-    // בדיקת המשקלים של המסלולים
+    // Checking the weights of the paths
     if (dijkstraResult.hasEdge(1, 3))
     {
-        // אם המסלול ל-3 הוא דרך 1, המשקל של הקשת צריך להיות 5
+        // If the path to 3 is through 1, the edge weight should be 5
         Node *edge13 = nullptr;
         Node *head1 = dijkstraResult.getHead(1);
         while (head1 != nullptr)
@@ -412,7 +412,7 @@ TEST_CASE("Testing Dijkstra algorithm")
     }
     else if (dijkstraResult.hasEdge(2, 3))
     {
-        // אם המסלול ל-3 הוא דרך 2, המשקל של הקשת צריך להיות 7
+        // If the path to 3 is through 2, the edge weight should be 7
         Node *edge23 = nullptr;
         Node *head2 = dijkstraResult.getHead(2);
         while (head2 != nullptr)
@@ -431,11 +431,11 @@ TEST_CASE("Testing Dijkstra algorithm")
         }
     }
 
-    // בדיקת מקרי קצה - גרף ריק
+    // Testing edge cases - empty graph
     Graph emptyGraph(3);
     Graph emptyDijkstraResult = Algorithms::dijkstra(emptyGraph, 0);
 
-    // בגרף ריק, דייקסטרה לא יוצר קשתות כלל
+    // In an empty graph, Dijkstra doesn't create any edges
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -447,129 +447,129 @@ TEST_CASE("Testing Dijkstra algorithm")
         }
     }
 
-    // בדיקת מקרה קצה - צומת התחלה שגוי
-    CHECK_THROWS_AS(Algorithms::dijkstra(g, -1), std::invalid_argument); // צומת שלילי
-    CHECK_THROWS_AS(Algorithms::dijkstra(g, 5), std::invalid_argument);  // צומת מחוץ לטווח
+    // Testing edge case - invalid start vertex
+    CHECK_THROWS_AS(Algorithms::dijkstra(g, -1), std::invalid_argument); // Negative vertex
+    CHECK_THROWS_AS(Algorithms::dijkstra(g, 5), std::invalid_argument);  // Vertex out of range
 
-    // בדיקת גרף לא קשיר
+    // Testing disconnected graph
     Graph disconnectedGraph(5);
     disconnectedGraph.addEdge(0, 1, 10);
     disconnectedGraph.addEdge(2, 3, 20);
-    // צמתים 0-1 ו-2-3 מנותקים זה מזה
+    // Vertices 0-1 and 2-3 are disconnected from each other
 
     Graph disconnectedDijkstra = Algorithms::dijkstra(disconnectedGraph, 0);
 
-    // בדיקה שרק הצמתים המחוברים מופיעים בתוצאה
+    // Checking that only connected vertices appear in the result
     CHECK(disconnectedDijkstra.hasEdge(0, 1));
-    // אין קשת בין 1 ל-2 כי הם ברכיבים שונים
+    // No edge between 1 and 2 because they're in different components
     CHECK_FALSE(disconnectedDijkstra.hasEdge(1, 2));
     CHECK_FALSE(disconnectedDijkstra.hasEdge(0, 3));
     CHECK_FALSE(disconnectedDijkstra.hasEdge(0, 4));
 
-    // בדיקת גרף עם מסלול רגיל ומסלול "זול" יותר שדורש יותר קשתות
+    // Testing graph with a regular path and a "cheaper" path that requires more edges
     Graph pathChoiceGraph(4);
-    pathChoiceGraph.addEdge(0, 3, 10); // מסלול ישיר יקר
-    pathChoiceGraph.addEdge(0, 1, 1);  // מסלול עקיף דרך 1 ו-2
+    pathChoiceGraph.addEdge(0, 3, 10); // Expensive direct path
+    pathChoiceGraph.addEdge(0, 1, 1);  // Cheaper indirect path through 1 and 2
     pathChoiceGraph.addEdge(1, 2, 2);
     pathChoiceGraph.addEdge(2, 3, 3);
 
     Graph pathChoiceResult = Algorithms::dijkstra(pathChoiceGraph, 0);
 
-    // דייקסטרה צריך לבחור במסלול העקיף כי הוא יותר זול (1+2+3=6 < 10)
+    // Dijkstra should choose the indirect path because it's cheaper (1+2+3=6 < 10)
     CHECK(pathChoiceResult.hasEdge(0, 1));
     CHECK(pathChoiceResult.hasEdge(1, 2));
     CHECK(pathChoiceResult.hasEdge(2, 3));
-    CHECK_FALSE(pathChoiceResult.hasEdge(0, 3)); // הקשת היקרה לא צריכה להיות בעץ
+    CHECK_FALSE(pathChoiceResult.hasEdge(0, 3)); // The expensive edge shouldn't be in the tree
 }
 
-// מחלקה עוקפת לבדיקות
+// Mock class for testing
 class MockAlgorithms : public Algorithms
 {
 public:
-    // עוקף את בדיקת מספר הקשתות
+    // Bypasses the edge count check
     static Graph prim_no_check(const Graph &graph)
     {
         int numVertices = graph.getNumVertices();
 
-        // יצירת גרף תוצאה ריק
+        // Create empty result graph
         Graph result(numVertices);
 
-        // אם אין מספיק צמתים, אין טעם להמשיך
+        // If not enough vertices, return early
         if (numVertices <= 1)
             return result;
 
-        // השתמש באותו קוד כמו prim, אבל ללא הבדיקה של מספר הקשתות
-        // מערך לסימון צמתים שכבר נכללו בעץ
+        // Use the same code as prim, but without the edge count check
+        // Array to mark vertices already included in MST
         bool *inMST = new bool[numVertices]();
 
-        // מערך המשקלים המינימליים לחיבור כל צומת לעץ
+        // Array of minimum weights to connect each vertex to the tree
         int *key = new int[numVertices];
 
-        // מערך ההורים של כל צומת בעץ הפורש
+        // Array of parent vertices for each vertex in the MST
         int *parent = new int[numVertices];
 
-        // אתחול מערכים
+        // Initialize arrays
         for (int i = 0; i < numVertices; i++)
         {
-            key[i] = INT_MAX; // אינסוף
-            parent[i] = -1;   // אין הורה
+            key[i] = INT_MAX; // Infinity
+            parent[i] = -1;   // No parent
         }
 
-        // נתחיל מהצומת הראשון (0)
-        key[0] = 0; // המשקל לצומת ההתחלה הוא 0
+        // Start from the first vertex (0)
+        key[0] = 0; // Weight to start vertex is 0
 
-        // תור עדיפויות למציאת הצומת הבא עם המשקל המינימלי
+        // Priority queue to find the next vertex with minimum weight
         PriorityQueue pq;
 
-        // מכניסים את צומת ההתחלה לתור העדיפויות
+        // Add start vertex to priority queue
         pq.enqueue(0, 0);
 
-        // כל עוד לא הוספנו את כל הצמתים לעץ
+        // While not all vertices have been added to the MST
         while (!pq.isEmpty())
         {
-            // מוציאים את הצומת עם המשקל המינימלי
+            // Extract vertex with minimum key
             int u = pq.peek();
             pq.dequeue();
 
-            // אם כבר הוספנו צומת זה לעץ, נמשיך
+            // If already added to MST, continue
             if (inMST[u])
                 continue;
 
-            // מוסיפים את הצומת לעץ
+            // Add vertex to MST
             inMST[u] = true;
 
-            // אם יש להורה, מוסיפים את הקשת לגרף התוצאה
+            // If it has a parent, add the edge to result graph
             if (parent[u] != -1)
             {
                 result.addEdge(u, parent[u], key[u]);
             }
 
-            // עוברים על כל השכנים של הצומת הנוכחי
+            // Check all neighbors of current vertex
             Node *neighbor = graph.getHead(u);
             while (neighbor != nullptr)
             {
                 int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם השכן עדיין לא בעץ ויש קשת קלה יותר
+                // If neighbor not in MST and has a lighter edge
                 if (!inMST[v] && weight < key[v])
                 {
-                    // עדכון המשקל
+                    // Update weight
                     key[v] = weight;
 
-                    // עדכון ההורה
+                    // Update parent
                     parent[v] = u;
 
-                    // הוספה לתור העדיפויות
+                    // Add to priority queue
                     pq.enqueue(v, key[v]);
                 }
 
-                // ממשיכים לשכן הבא
+                // Move to next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] inMST;
         delete[] key;
         delete[] parent;
@@ -577,32 +577,32 @@ public:
         return result;
     }
 
-    // עוקף את בדיקת מספר הקשתות
+    // Bypasses the edge count check
     static Graph kruskal_no_check(const Graph &graph)
     {
         int numVertices = graph.getNumVertices();
 
-        // יצירת גרף תוצאה ריק
+        // Create empty result graph
         Graph result(numVertices);
 
-        // אם אין מספיק צמתים, אין טעם להמשיך
+        // If not enough vertices, return early
         if (numVertices <= 1)
             return result;
 
-        // איסוף כל הקשתות מהגרף
-        // במקרה הגרוע יש n(n-1)/2 קשתות בגרף לא מכוון
+        // Collect all edges from the graph
+        // In worst case, there are n(n-1)/2 edges in an undirected graph
         int maxEdges = numVertices * (numVertices - 1) / 2;
         Edge *edges = new Edge[maxEdges];
         int edgeCount = 0;
 
-        // עוברים על כל הצמתים והקשתות
+        // Iterate through all vertices and edges
         for (int i = 0; i < numVertices; i++)
         {
             Node *neighbor = graph.getHead(i);
             while (neighbor != nullptr)
             {
-                // למנוע כפילויות (כי זה גרף לא מכוון)
-                // נוסיף את הקשת רק אם i < שכן
+                // Prevent duplicates (since it's an undirected graph)
+                // Add edge only if i < neighbor
                 if (i < neighbor->val)
                 {
                     edges[edgeCount].src = i;
@@ -611,19 +611,19 @@ public:
                     edgeCount++;
                 }
 
-                // ממשיכים לשכן הבא
+                // Move to next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // מיון הקשתות לפי משקל בסדר עולה
+        // Sort edges by weight in ascending order
         for (int i = 0; i < edgeCount - 1; i++)
         {
             for (int j = 0; j < edgeCount - i - 1; j++)
             {
                 if (edges[j].weight > edges[j + 1].weight)
                 {
-                    // החלפה
+                    // Swap
                     Edge temp = edges[j];
                     edges[j] = edges[j + 1];
                     edges[j + 1] = temp;
@@ -631,37 +631,37 @@ public:
             }
         }
 
-        // יצירת מבנה Union-Find
+        // Create Union-Find structure
         UnionFind uf(numVertices);
 
-        // עוברים על הקשתות בסדר עולה של משקל
+        // Process edges in ascending order of weight
         for (int i = 0; i < edgeCount; i++)
         {
             int src = edges[i].src;
             int dest = edges[i].dest;
 
-            // בודקים אם הקשת יוצרת מעגל
+            // Check if edge creates a cycle
             if (!uf.connected(src, dest))
             {
-                // אם לא, מוסיפים אותה לעץ הפורש המינימלי
+                // If not, add it to the MST
                 result.addEdge(src, dest, edges[i].weight);
 
-                // מאחדים את הקבוצות
+                // Union the sets
                 uf.unionSet(src, dest);
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] edges;
 
         return result;
     }
 };
 
-// בדיקות לאלגוריתם פרים
+// Testing Prim algorithm
 TEST_CASE("Testing Prim algorithm")
 {
-    // יצירת גרף מבחן עם משקלים
+    // Creating a test graph with weights
     Edge edges[] = {
         {0, 1, 10},
         {0, 2, 6},
@@ -670,7 +670,7 @@ TEST_CASE("Testing Prim algorithm")
         {2, 3, 4}};
     Graph g(edges, 5, 4);
 
-    // הוספה ידנית של מספיק קשתות לגרף כדי לעבור את הבדיקה
+    // Manually count edges to verify there are enough
     int manualEdgeCount = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -681,13 +681,13 @@ TEST_CASE("Testing Prim algorithm")
         }
     }
 
-    // וידוא שיש מספיק קשתות בגרף (לפחות n-1)
+    // Verify there are enough edges in the graph (at least n-1)
     CHECK_GE(manualEdgeCount, g.getNumVertices() - 1);
 
-    // הפעלת אלגוריתם פרים ללא בדיקת מספר קשתות
+    // Run Prim algorithm without edge count check
     Graph primResult = MockAlgorithms::prim_no_check(g);
 
-    // בדיקה שהתוצאה היא עץ פורש מלא
+    // Check that the result is a complete spanning tree
     int edgeCount = 0;
     for (int i = 0; i < g.getNumVertices(); i++)
     {
@@ -698,26 +698,26 @@ TEST_CASE("Testing Prim algorithm")
             head = head->next;
         }
     }
-    // בדיקה שיש בדיוק n-1 קשתות (כל קשת נספרת פעמיים בגרף לא מכוון)
+    // Check that there are exactly n-1 edges (each edge is counted twice in undirected graph)
     CHECK_EQ(edgeCount, (g.getNumVertices() - 1) * 2);
 
-    // בדיקה שהקשתות שנבחרו הן בעלות המשקל המינימלי
-    // העץ הפורש המינימלי צפוי לכלול את הקשתות: (0,3), (2,3), (0,2) עם משקל כולל 5+4+6=15
+    // Check that the selected edges have minimum weight
+    // The MST is expected to include edges: (0,3), (2,3), (0,2) with total weight 5+4+6=15
     CHECK(primResult.hasEdge(0, 3));
     CHECK(primResult.hasEdge(2, 3));
 
-    // אחד מהם אמור להיות נכון
+    // One of these should be true
     bool hasEdge0_2 = primResult.hasEdge(0, 2);
     bool hasEdge0_1 = primResult.hasEdge(0, 1);
     CHECK((hasEdge0_2 || hasEdge0_1));
 
-    CHECK_FALSE(primResult.hasEdge(1, 3)); // קשת כבדה שלא אמורה להיות בעץ
+    CHECK_FALSE(primResult.hasEdge(1, 3)); // Heavy edge that shouldn't be in the tree
 }
 
-// בדיקות לאלגוריתם קרוסקל
+// Testing Kruskal algorithm
 TEST_CASE("Testing Kruskal algorithm")
 {
-    // יצירת גרף מבחן עם משקלים
+    // Creating a test graph with weights
     Edge edges[] = {
         {0, 1, 10},
         {0, 2, 6},
@@ -726,7 +726,7 @@ TEST_CASE("Testing Kruskal algorithm")
         {2, 3, 4}};
     Graph g(edges, 5, 4);
 
-    // הוספה ידנית של מספיק קשתות לגרף כדי לעבור את הבדיקה
+    // Manually count edges to verify there are enough
     int manualEdgeCount = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -737,13 +737,13 @@ TEST_CASE("Testing Kruskal algorithm")
         }
     }
 
-    // וידוא שיש מספיק קשתות בגרף (לפחות n-1)
+    // Verify there are enough edges in the graph (at least n-1)
     CHECK_GE(manualEdgeCount, g.getNumVertices() - 1);
 
-    // הפעלת אלגוריתם קרוסקל ללא בדיקת מספר קשתות
+    // Run Kruskal algorithm without edge count check
     Graph kruskalResult = MockAlgorithms::kruskal_no_check(g);
 
-    // בדיקה שהתוצאה היא עץ פורש מלא
+    // Check that the result is a complete spanning tree
     int edgeCount = 0;
     for (int i = 0; i < g.getNumVertices(); i++)
     {
@@ -754,32 +754,32 @@ TEST_CASE("Testing Kruskal algorithm")
             head = head->next;
         }
     }
-    // בדיקה שיש בדיוק n-1 קשתות (כל קשת נספרת פעמיים בגרף לא מכוון)
+    // Check that there are exactly n-1 edges (each edge is counted twice in undirected graph)
     CHECK_EQ(edgeCount, (g.getNumVertices() - 1) * 2);
 
-    // בדיקה שהקשתות שנבחרו הן בעלות המשקל המינימלי
-    // העץ הפורש המינימלי צפוי לכלול את הקשתות: (2,3), (0,3), (0,2) עם משקל כולל 4+5+6=15
-    CHECK(kruskalResult.hasEdge(2, 3)); // קשת עם המשקל הקטן ביותר
-    CHECK(kruskalResult.hasEdge(0, 3)); // קשת עם המשקל השני הקטן ביותר
+    // Check that the selected edges have minimum weight
+    // The MST is expected to include edges: (2,3), (0,3), (0,2) with total weight 4+5+6=15
+    CHECK(kruskalResult.hasEdge(2, 3)); // Edge with smallest weight
+    CHECK(kruskalResult.hasEdge(0, 3)); // Edge with second smallest weight
 
-    // אחד מהם אמור להיות נכון
+    // One of these should be true
     bool hasEdge0_2 = kruskalResult.hasEdge(0, 2);
     bool hasEdge0_1 = kruskalResult.hasEdge(0, 1);
     CHECK((hasEdge0_2 || hasEdge0_1));
 
-    CHECK_FALSE(kruskalResult.hasEdge(1, 3)); // קשת כבדה שלא אמורה להיות בעץ
+    CHECK_FALSE(kruskalResult.hasEdge(1, 3)); // Heavy edge that shouldn't be in the tree
 }
 
-// בדיקות למבנה נתונים Queue
+// Testing Queue data structure
 TEST_CASE("Testing Queue")
 {
-    // בדיקת יצירת תור
+    // Testing queue creation
     Queue q(5);
     CHECK(q.isEmpty());
     CHECK_FALSE(q.isFull());
     CHECK_EQ(q.getSize(), 0);
 
-    // בדיקת הכנסה לתור והוצאה מתור
+    // Testing enqueue and dequeue operations
     q.enqueue(10);
     CHECK_FALSE(q.isEmpty());
     CHECK_EQ(q.getSize(), 1);
@@ -798,11 +798,11 @@ TEST_CASE("Testing Queue")
     CHECK_EQ(q.dequeue(), 30);
     CHECK(q.isEmpty());
 
-    // בדיקת מקרי קצה
-    CHECK_THROWS_AS(q.peek(), std::underflow_error);    // תור ריק
-    CHECK_THROWS_AS(q.dequeue(), std::underflow_error); // תור ריק
+    // Testing edge cases
+    CHECK_THROWS_AS(q.peek(), std::underflow_error);    // Empty queue should throw
+    CHECK_THROWS_AS(q.dequeue(), std::underflow_error); // Empty queue should throw
 
-    // מילוי התור
+    // Fill the queue to capacity
     q.enqueue(1);
     q.enqueue(2);
     q.enqueue(3);
@@ -810,22 +810,22 @@ TEST_CASE("Testing Queue")
     q.enqueue(5);
     CHECK(q.isFull());
 
-    // ניסיון להכניס לתור מלא
+    // Attempt to enqueue to a full queue
     CHECK_THROWS_AS(q.enqueue(6), std::overflow_error);
 
-    // בדיקת התנהגות מעגלית
+    // Test partial dequeue
     CHECK_EQ(q.dequeue(), 1);
     CHECK_EQ(q.dequeue(), 2);
 
-    // עכשיו התור לא מלא
+    // Queue should no longer be full
     CHECK_FALSE(q.isFull());
 
-    // ניתן להכניס שוב
+    // Should be able to enqueue again
     q.enqueue(6);
     q.enqueue(7);
     CHECK(q.isFull());
 
-    // בדיקה שהתור עובד בצורה מעגלית
+    // Test circular behavior of the queue
     CHECK_EQ(q.dequeue(), 3);
     CHECK_EQ(q.dequeue(), 4);
     CHECK_EQ(q.dequeue(), 5);
@@ -834,22 +834,22 @@ TEST_CASE("Testing Queue")
     CHECK(q.isEmpty());
 }
 
-// בדיקות למבנה נתונים PriorityQueue
+// Testing PriorityQueue data structure
 TEST_CASE("Testing PriorityQueue")
 {
-    // בדיקת יצירת תור עדיפויות
+    // Test priority queue creation
     PriorityQueue pq;
     CHECK(pq.isEmpty());
 
-    // בדיקת הכנסה לתור והוצאה לפי עדיפות
-    pq.enqueue(10, 2); // ערך 10 עם עדיפות 2
-    pq.enqueue(20, 1); // ערך 20 עם עדיפות 1 (גבוהה יותר)
-    pq.enqueue(30, 3); // ערך 30 עם עדיפות 3 (נמוכה יותר)
+    // Test enqueue and dequeue by priority
+    pq.enqueue(10, 2); // Value 10 with priority 2
+    pq.enqueue(20, 1); // Value 20 with priority 1 (higher priority)
+    pq.enqueue(30, 3); // Value 30 with priority 3 (lower priority)
 
-    // בדיקה שפעולת peek מחזירה את הערך עם העדיפות הגבוהה ביותר
+    // Check that peek returns the highest priority element
     CHECK_EQ(pq.peek(), 20);
 
-    // הוצאה מהתור
+    // Test dequeue operation
     pq.dequeue();
     CHECK_EQ(pq.peek(), 10);
 
@@ -859,16 +859,16 @@ TEST_CASE("Testing PriorityQueue")
     pq.dequeue();
     CHECK(pq.isEmpty());
 
-    // בדיקת מקרי קצה
-    CHECK_THROWS_AS(pq.peek(), std::underflow_error);    // תור ריק
-    CHECK_THROWS_AS(pq.dequeue(), std::underflow_error); // תור ריק
+    // Test edge cases
+    CHECK_THROWS_AS(pq.peek(), std::underflow_error);    // Empty queue should throw
+    CHECK_THROWS_AS(pq.dequeue(), std::underflow_error); // Empty queue should throw
 
-    // בדיקת תור עם עדיפויות זהות
+    // Test queue with identical priorities
     pq.enqueue(100, 5);
     pq.enqueue(200, 5);
     pq.enqueue(300, 5);
 
-    // בדיקה שהערכים יוצאים לפי סדר הכנסתם כאשר העדיפויות זהות
+    // Check that values are dequeued in FIFO order when priorities are equal
     CHECK_EQ(pq.peek(), 100);
     pq.dequeue();
     CHECK_EQ(pq.peek(), 200);
@@ -877,34 +877,34 @@ TEST_CASE("Testing PriorityQueue")
     pq.dequeue();
     CHECK(pq.isEmpty());
 
-    // בדיקת עדיפויות מעורבות
+    // Test mixed priorities
     pq.enqueue(1, 10);
     pq.enqueue(2, 5);
     pq.enqueue(3, 15);
     pq.enqueue(4, 7);
     pq.enqueue(5, 3);
 
-    // בדיקה שהערכים יוצאים בסדר עדיפויות עולה
-    CHECK_EQ(pq.peek(), 5); // עדיפות 3
+    // Check that values are dequeued in ascending priority order
+    CHECK_EQ(pq.peek(), 5); // Priority 3
     pq.dequeue();
-    CHECK_EQ(pq.peek(), 2); // עדיפות 5
+    CHECK_EQ(pq.peek(), 2); // Priority 5
     pq.dequeue();
-    CHECK_EQ(pq.peek(), 4); // עדיפות 7
+    CHECK_EQ(pq.peek(), 4); // Priority 7
     pq.dequeue();
-    CHECK_EQ(pq.peek(), 1); // עדיפות 10
+    CHECK_EQ(pq.peek(), 1); // Priority 10
     pq.dequeue();
-    CHECK_EQ(pq.peek(), 3); // עדיפות 15
+    CHECK_EQ(pq.peek(), 3); // Priority 15
     pq.dequeue();
     CHECK(pq.isEmpty());
 }
 
-// בדיקות למבנה נתונים UnionFind
+// Testing UnionFind data structure
 TEST_CASE("Testing UnionFind")
 {
-    // בדיקת יצירת מבנה Union-Find
+    // Test UnionFind creation
     UnionFind uf(5);
 
-    // בבדיקת במצב התחלתי כל צומת הוא בקבוצה משלו
+    // Initially, each node should be in its own set
     for (int i = 0; i < 5; i++)
     {
         CHECK_EQ(uf.find(i), i);
@@ -921,10 +921,10 @@ TEST_CASE("Testing UnionFind")
         }
     }
 
-    // בדיקה שיש בדיוק 5 קבוצות נפרדות
+    // Check that there are exactly 5 separate sets
     CHECK_EQ(uf.getSetCount(), 5);
 
-    // בדיקת איחוד צמתים
+    // Test union operation
     uf.unionSet(0, 1);
     CHECK(uf.connected(0, 1));
     CHECK_EQ(uf.getSetCount(), 4);
@@ -933,67 +933,67 @@ TEST_CASE("Testing UnionFind")
     CHECK(uf.connected(2, 3));
     CHECK_EQ(uf.getSetCount(), 3);
 
-    // בדיקה שהצמתים עדיין לא מחוברים
+    // Check that nodes are still not connected
     CHECK_FALSE(uf.connected(0, 2));
     CHECK_FALSE(uf.connected(1, 3));
 
-    // בדיקה שאיחוד נוסף עובד בצורה טרנזיטיבית
+    // Test transitive connectivity after union
     uf.unionSet(0, 2);
     CHECK(uf.connected(0, 2));
-    CHECK(uf.connected(0, 3)); // 0 מחובר ל-2 ו-2 מחובר ל-3
-    CHECK(uf.connected(1, 3)); // 1 מחובר ל-0, ו-0 מחובר ל-3
+    CHECK(uf.connected(0, 3)); // 0 is connected to 2 and 2 is connected to 3
+    CHECK(uf.connected(1, 3)); // 1 is connected to 0, and 0 is connected to 3
     CHECK_EQ(uf.getSetCount(), 2);
 
-    // בדיקה שצומת 4 עדיין מנותק
+    // Check that node 4 is still disconnected
     CHECK_FALSE(uf.connected(0, 4));
     CHECK_FALSE(uf.connected(1, 4));
     CHECK_FALSE(uf.connected(2, 4));
     CHECK_FALSE(uf.connected(3, 4));
 
-    // איחוד אחרון
+    // Final union
     uf.unionSet(3, 4);
-    CHECK(uf.connected(0, 4)); // כל הצמתים מחוברים כעת
+    CHECK(uf.connected(0, 4)); // All nodes should be connected now
     CHECK_EQ(uf.getSetCount(), 1);
 
-    // בדיקת מקרי קצה - איחוד קבוצה עם עצמה
+    // Test edge cases - union of a set with itself
     int setCountBefore = uf.getSetCount();
     uf.unionSet(0, 0);
-    CHECK_EQ(uf.getSetCount(), setCountBefore); // לא השתנה
+    CHECK_EQ(uf.getSetCount(), setCountBefore); // Should not change
 
-    // ניסיון לאחד צמתים שכבר באותה קבוצה
+    // Attempt to union nodes already in the same set
     setCountBefore = uf.getSetCount();
     uf.unionSet(1, 4);
-    CHECK_EQ(uf.getSetCount(), setCountBefore); // לא השתנה
+    CHECK_EQ(uf.getSetCount(), setCountBefore); // Should not change
 }
 
-// בדיקת מקרה שבו אין מספיק קשתות לאלגוריתמי MST
+// Test case where there aren't enough edges for MST algorithms
 TEST_CASE("Testing MST algorithms with not enough edges")
 {
-    // יצירת גרף עם 4 צמתים אבל רק 2 קשתות (צריך לפחות 3 קשתות)
+    // Create a graph with 4 vertices but only 2 edges (need at least 3 edges)
     Graph g(4);
     g.addEdge(0, 1, 5);
     g.addEdge(1, 2, 10);
 
-    // בדיקה שפרים זורק שגיאה כשאין מספיק קשתות
+    // Check that Prim's algorithm throws when there aren't enough edges
     CHECK_THROWS_AS(Algorithms::prim(g), std::runtime_error);
     CHECK_THROWS_WITH(Algorithms::prim(g), "Graph does not have at least n-1 edges!");
 
-    // בדיקה שקרוסקל זורק שגיאה כשאין מספיק קשתות
+    // Check that Kruskal's algorithm throws when there aren't enough edges
     CHECK_THROWS_AS(Algorithms::kruskal(g), std::runtime_error);
     CHECK_THROWS_WITH(Algorithms::kruskal(g), "Graph does not have at least n-1 edges!");
 
-    // נוסיף עוד קשת כדי שיהיה מספיק קשתות
+    // Add another edge to have enough edges
     g.addEdge(2, 3, 15);
 
-    // עכשיו אלגוריתמי ה-MST אמורים לעבוד ללא שגיאה
+    // Now MST algorithms should work without errors
     CHECK_NOTHROW(Algorithms::prim(g));
     CHECK_NOTHROW(Algorithms::kruskal(g));
 
-    // בדיקה שהתוצאה היא עץ פורש מלא
+    // Check that the result is a complete spanning tree
     Graph primResult = Algorithms::prim(g);
     Graph kruskalResult = Algorithms::kruskal(g);
 
-    // בדיקה שיש בדיוק n-1 קשתות (כל קשת נספרת פעמיים בגרף לא מכוון)
+    // Check that there are exactly n-1 edges (each edge is counted twice in undirected graph)
     int primEdgeCount = 0;
     int kruskalEdgeCount = 0;
 

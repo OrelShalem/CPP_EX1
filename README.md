@@ -101,10 +101,3 @@ make
 make test
 ./test
 ```
-
-## References
-- Original implementation inspired by: https://www.techiedelight.com/graph-implementation-c-without-using-stl/
-- Enhanced with additional algorithms and features
-
-## License
-This project is available for educational purposes and is free to use and modify.

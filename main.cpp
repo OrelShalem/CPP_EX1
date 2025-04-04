@@ -30,20 +30,20 @@ void printHeader(const std::string &title)
  */
 Graph createExampleGraph()
 {
-    // יצירת גרף עם 6 צמתים
+    // Create a graph with 6 vertices
     int numVertices = 6;
     int numEdges = 9;
 
     Edge edges[9] = {
-        {0, 1, 4}, // קשת מ-0 ל-1 במשקל 4
-        {0, 2, 3}, // קשת מ-0 ל-2 במשקל 3
-        {1, 2, 2}, // קשת מ-1 ל-2 במשקל 2
-        {1, 3, 5}, // קשת מ-1 ל-3 במשקל 5
-        {2, 3, 7}, // קשת מ-2 ל-3 במשקל 7
-        {2, 4, 8}, // קשת מ-2 ל-4 במשקל 8
-        {3, 4, 1}, // קשת מ-3 ל-4 במשקל 1
-        {3, 5, 6}, // קשת מ-3 ל-5 במשקל 6
-        {4, 5, 9}  // קשת מ-4 ל-5 במשקל 9
+        {0, 1, 4}, // Edge from 0 to 1 with weight 4
+        {0, 2, 3}, // Edge from 0 to 2 with weight 3
+        {1, 2, 2}, // Edge from 1 to 2 with weight 2
+        {1, 3, 5}, // Edge from 1 to 3 with weight 5
+        {2, 3, 7}, // Edge from 2 to 3 with weight 7
+        {2, 4, 8}, // Edge from 2 to 4 with weight 8
+        {3, 4, 1}, // Edge from 3 to 4 with weight 1
+        {3, 5, 6}, // Edge from 3 to 5 with weight 6
+        {4, 5, 9}  // Edge from 4 to 5 with weight 9
     };
 
     return Graph(edges, numEdges, numVertices);
@@ -70,7 +70,7 @@ Graph createUserGraph()
         throw std::invalid_argument("Invalid number of vertices!");
     }
 
-    // יצירת גרף ריק עם מספר צמתים מוגדר
+    // Create an empty graph with the specified number of vertices
     Graph graph(numVertices);
 
     std::cout << "Enter number of edges: ";
@@ -88,44 +88,44 @@ Graph createUserGraph()
         std::cout << "Edge " << i + 1 << ": ";
         std::cin >> src >> dest >> weight;
 
-        // נבצע תחילה את הבדיקות שאינן כלולות ב-addEdge
-        // או כאלה שברצוננו לתת למשתמש שגיאה ספציפית לגביהן
+        // First perform checks that are not included in addEdge
+        // or those for which we want to give the user specific error messages
 
-        // בדיקת תקינות מספרי צמתים
+        // Check validity of vertex numbers
         if (src >= numVertices || dest >= numVertices || src < 0 || dest < 0)
         {
             std::cout << "Invalid vertex numbers! Vertices should be between 0 and "
                       << numVertices - 1 << std::endl;
-            i--; // נסה שוב
+            i--; // Try again
             continue;
         }
 
-        // בדיקת לולאות עצמיות
+        // Check for self-loops
         if (src == dest)
         {
             std::cout << "Self-loops are not allowed in a simple graph! Please try again." << std::endl;
-            i--; // נסה שוב
+            i--; // Try again
             continue;
         }
 
-        // בדיקת קשתות כפולות
+        // Check for duplicate edges
         if (graph.hasEdge(src, dest))
         {
             std::cout << "Duplicate edge detected! A simple graph cannot have multiple edges between the same vertices." << std::endl;
-            i--; // נסה שוב
+            i--; // Try again
             continue;
         }
 
-        // אם הגענו לכאן, הקשת תקינה ואפשר להוסיף אותה לגרף
+        // If we've reached here, the edge is valid and can be added to the graph
         try
         {
             graph.addEdge(src, dest, weight);
         }
         catch (const std::exception &e)
         {
-            // למקרה שהפונקציה addEdge תזרוק חריגה שלא צפינו
+            // In case the addEdge function throws an unexpected exception
             std::cout << "Error adding edge: " << e.what() << ". Please try again." << std::endl;
-            i--; // נסה שוב
+            i--; // Try again
             continue;
         }
     }
@@ -162,7 +162,7 @@ int main()
 
     Graph graph = (choice == 1) ? createExampleGraph() : createUserGraph();
 
-    // הדפסת הגרף המקורי
+    // Print the original graph
     printHeader("ORIGINAL GRAPH");
     std::cout << "Graph structure with " << graph.getNumVertices() << " vertices:" << std::endl;
     for (int i = 0; i < graph.getNumVertices(); i++)
@@ -170,12 +170,12 @@ int main()
         graph.print_graph(graph.getHead(i), i);
     }
 
-    // בחירת צומת התחלה לאלגוריתמים
+    // Choose a starting vertex for algorithms
     int startVertex;
     std::cout << "\nChoose a start vertex for BFS, DFS and Dijkstra (0-" << graph.getNumVertices() - 1 << "): ";
     std::cin >> startVertex;
 
-    // בדיקת תקינות צומת ההתחלה
+    // Validate the starting vertex
     if (startVertex < 0 || startVertex >= graph.getNumVertices())
     {
         std::cout << "Invalid vertex! Using vertex 0 instead." << std::endl;
@@ -184,7 +184,7 @@ int main()
 
     try
     {
-        // אלגוריתם BFS
+        // BFS Algorithm
         printHeader("BFS ALGORITHM");
         std::cout << "Running BFS starting from vertex " << startVertex << ":" << std::endl;
         Graph bfsResult = Algorithms::bfs(graph, startVertex);
@@ -194,7 +194,7 @@ int main()
             bfsResult.print_graph(bfsResult.getHead(i), i);
         }
 
-        // אלגוריתם DFS
+        // DFS Algorithm
         printHeader("DFS ALGORITHM");
         std::cout << "Running DFS starting from vertex " << startVertex << ":" << std::endl;
         Graph dfsResult = Algorithms::dfs(graph, startVertex);
@@ -204,7 +204,7 @@ int main()
             dfsResult.print_graph(dfsResult.getHead(i), i);
         }
 
-        // אלגוריתם דייקסטרה
+        // Dijkstra's Algorithm
         printHeader("DIJKSTRA ALGORITHM");
         std::cout << "Running Dijkstra's algorithm from vertex " << startVertex << ":" << std::endl;
         Graph dijkstraResult = Algorithms::dijkstra(graph, startVertex);
@@ -214,7 +214,7 @@ int main()
             dijkstraResult.print_graph(dijkstraResult.getHead(i), i);
         }
 
-        // אלגוריתם פרים
+        // Prim's Algorithm
         printHeader("PRIM'S ALGORITHM");
         std::cout << "Running Prim's algorithm for Minimum Spanning Tree:" << std::endl;
         Graph primResult = Algorithms::prim(graph);
@@ -224,7 +224,7 @@ int main()
             primResult.print_graph(primResult.getHead(i), i);
         }
 
-        // אלגוריתם קרוסקל
+        // Kruskal's Algorithm
         printHeader("KRUSKAL'S ALGORITHM");
         std::cout << "Running Kruskal's algorithm for Minimum Spanning Tree:" << std::endl;
         Graph kruskalResult = Algorithms::kruskal(graph);
@@ -234,21 +234,21 @@ int main()
             kruskalResult.print_graph(kruskalResult.getHead(i), i);
         }
 
-        // // בדיקת הוספה והסרה של קשתות
+        // // Edge operations demonstration
         // printHeader("EDGE OPERATIONS");
         // std::cout << "Demonstrating edge operations:" << std::endl;
 
-        // // העתקת הגרף המקורי
+        // // Copy the original graph
         // Graph testGraph = createExampleGraph();
 
-        // // הדפסת הגרף המקורי
+        // // Print the original graph
         // std::cout << "Original graph:" << std::endl;
         // for (int i = 0; i < testGraph.getNumVertices(); i++)
         // {
         //     testGraph.print_graph(testGraph.getHead(i), i);
         // }
 
-        // // הוספת קשת חדשה
+        // // Add a new edge
         // std::cout << "\nAdding edge from 0 to 5 with weight 10:" << std::endl;
         // testGraph.addEdge(0, 5, 10);
         // std::cout << "After adding edge:" << std::endl;
@@ -257,7 +257,7 @@ int main()
         //     testGraph.print_graph(testGraph.getHead(i), i);
         // }
 
-        // // הסרת קשת
+        // // Remove an edge
         // std::cout << "\nRemoving edge between 0 and 1:" << std::endl;
         // testGraph.removeEdge(0, 1);
         // std::cout << "After removing edge:" << std::endl;
@@ -266,7 +266,7 @@ int main()
         //     testGraph.print_graph(testGraph.getHead(i), i);
         // }
 
-        // // בדיקת קיום קשת
+        // // Check if edges exist
         // std::cout << "\nChecking if edges exist:" << std::endl;
         // std::cout << "Edge 0-2 exists: " << (testGraph.hasEdge(0, 2) ? "Yes" : "No") << std::endl;
         // std::cout << "Edge 0-1 exists: " << (testGraph.hasEdge(0, 1) ? "Yes" : "No") << std::endl;

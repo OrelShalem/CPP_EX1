@@ -35,12 +35,12 @@ namespace graph
 
             try
             {
-                // שימוש ב-addEdge במקום להוסיף ישירות לרשימה
+                // Use addEdge instead of directly adding to the list
                 addEdge(src, dest, weight);
             }
             catch (const std::invalid_argument &e)
             {
-                // אם addEdge זורק חריגה, נדפיס אזהרה ונמשיך
+                // If addEdge throws an exception, print a warning and continue
                 std::cout << "Warning: " << e.what() << std::endl;
             }
         }
@@ -286,61 +286,61 @@ namespace graph
     {
         int numVertices = graph.getNumVertices();
 
-        // בדיקת תקינות צומת ההתחלה
+        // Validate the start vertex
         if (start < 0 || start >= numVertices)
         {
             throw std::invalid_argument("Invalid start vertex!");
         }
 
-        // יצירת גרף תוצאה ריק
+        // Create an empty result graph
         Graph result(numVertices);
 
-        // מערך לסימון צמתים שכבר ביקרנו בהם
+        // Array to mark visited vertices
         bool *visited = new bool[numVertices]();
 
-        // תור לאחסון הצמתים שנגלו אך טרם נבדקו
+        // Queue to store discovered but not yet processed vertices
         Queue q(numVertices);
 
-        // סימון צומת ההתחלה כמבוקר
+        // Mark the start vertex as visited
         visited[start] = true;
 
-        // הכנסת צומת ההתחלה לתור
+        // Add the start vertex to the queue
         q.enqueue(start);
 
-        // כל עוד התור לא ריק
+        // While the queue is not empty
         while (!q.isEmpty())
         {
-            // הוצאת צומת מהתור
+            // Remove a vertex from the queue
             int u = q.dequeue();
 
-            // קבלת רשימת השכנים של הצומת
+            // Get the adjacency list of the vertex
             Node *neighbor = graph.getHead(u);
 
-            // עבור כל שכן
+            // For each neighbor
             while (neighbor != nullptr)
             {
                 int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם השכן טרם בוקר
+                // If the neighbor has not been visited
                 if (!visited[v])
                 {
-                    // סימון השכן כמבוקר
+                    // Mark the neighbor as visited
                     visited[v] = true;
 
-                    // הוספת קשת לגרף התוצאה
+                    // Add an edge to the result graph
                     result.addEdge(u, v, weight);
 
-                    // הכנסת השכן לתור
+                    // Add the neighbor to the queue
                     q.enqueue(v);
                 }
 
-                // מעבר לשכן הבא
+                // Move to the next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] visited;
 
         return result;
@@ -360,36 +360,36 @@ namespace graph
      */
     void dfsUtil(const Graph &graph, int u, bool visited[], Graph &result, int parent)
     {
-        // סימון הצומת הנוכחי כמבוקר
+        // Mark the current vertex as visited
         visited[u] = true;
 
-        // קבלת רשימת השכנים של הצומת
+        // Get the adjacency list of the vertex
         Node *neighbor = graph.getHead(u);
 
-        // עבור כל שכן
+        // For each neighbor
         while (neighbor != nullptr)
         {
             int v = neighbor->val;
             int weight = neighbor->cost;
 
-            // אם השכן טרם בוקר
+            // If the neighbor has not been visited
             if (!visited[v])
             {
-                // הוספת קשת לגרף התוצאה
+                // Add an edge to the result graph
                 result.addEdge(u, v, weight);
 
-                // קריאה רקורסיבית לשכן - מעביר את הצומת הנוכחי כהורה
+                // Recursive call to the neighbor - passing current vertex as parent
                 dfsUtil(graph, v, visited, result, u);
             }
-            // מונע הוספת קשת חזרה להורה (אם זהו גרף לא מכוון)
-            // אם השכן הוא ההורה של הצומת הנוכחי, נדלג עליו
+            // Prevent adding back edge to parent (for undirected graphs)
+            // If the neighbor is the parent of the current vertex, skip it
             else if (v != parent)
             {
-                // כאן ניתן להוסיף לוגיקה נוספת אם נרצה לטפל בקשתות אחורה
-                // לדוגמה: זיהוי מעגלים
+                // Here we can add additional logic if we want to handle back edges
+                // For example: cycle detection
             }
 
-            // מעבר לשכן הבא
+            // Move to the next neighbor
             neighbor = neighbor->next;
         }
     }
@@ -409,22 +409,22 @@ namespace graph
     {
         int numVertices = graph.getNumVertices();
 
-        // בדיקת תקינות צומת ההתחלה
+        // Validate the start vertex
         if (start < 0 || start >= numVertices)
         {
             throw std::invalid_argument("Invalid start vertex!");
         }
 
-        // יצירת גרף תוצאה ריק
+        // Create an empty result graph
         Graph result(numVertices);
 
-        // מערך לסימון צמתים שכבר ביקרנו בהם
+        // Array to mark visited vertices
         bool *visited = new bool[numVertices]();
 
-        // מבצעים DFS מצומת ההתחלה
+        // Perform DFS from the start vertex
         dfsUtil(graph, start, visited, result, -1);
 
-        // שחרור זיכרון
+        // Free memory
         delete[] visited;
 
         return result;
@@ -446,88 +446,88 @@ namespace graph
     {
         int numVertices = graph.getNumVertices();
 
-        // בדיקת תקינות צומת ההתחלה
+        // Validate the start vertex
         if (start < 0 || start >= numVertices)
         {
             throw std::invalid_argument("Invalid start vertex!");
         }
 
-        // יצירת גרף תוצאה ריק
+        // Create an empty result graph
         Graph result(numVertices);
 
-        // מערך המרחקים הקצרים ביותר מצומת ההתחלה
+        // Array of shortest distances from start vertex
         int *distance = new int[numVertices];
 
-        // מערך לסימון צמתים שכבר הסתיימו
+        // Array to mark vertices that are finalized
         bool *finalized = new bool[numVertices]();
 
-        // מערך שומר את ההורה של כל צומת במסלול הקצר ביותר
+        // Array to store the parent of each vertex in the shortest path
         int *parent = new int[numVertices];
 
-        // אתחול מערכים
+        // Initialize arrays
         for (int i = 0; i < numVertices; i++)
         {
-            distance[i] = INT_MAX; // אינסוף
-            parent[i] = -1;        // אין הורה
+            distance[i] = INT_MAX; // Infinity
+            parent[i] = -1;        // No parent
         }
 
-        // המרחק מצומת ההתחלה לעצמו הוא 0
+        // Distance from start vertex to itself is 0
         distance[start] = 0;
 
-        // תור עדיפויות למציאת הצומת הבא עם המרחק המינימלי
+        // Priority queue to find the next vertex with minimum distance
         PriorityQueue pq;
 
-        // מכניסים את צומת ההתחלה לתור העדיפויות
+        // Add the start vertex to the priority queue
         pq.enqueue(start, 0);
 
-        // כל עוד התור לא ריק
+        // While the queue is not empty
         while (!pq.isEmpty())
         {
-            // מוציאים את הצומת עם המרחק המינימלי
+            // Remove the vertex with minimum distance
             int u = pq.peek();
             pq.dequeue();
 
-            // אם כבר סיימנו עם צומת זה, נמשיך
+            // If we've already finalized this vertex, continue
             if (finalized[u])
                 continue;
 
-            // מסמנים שסיימנו עם צומת זה
+            // Mark this vertex as finalized
             finalized[u] = true;
 
-            // אם יש להורה, מוסיפים את הקשת לגרף התוצאה
+            // If it has a parent, add the edge to the result graph
             if (parent[u] != -1)
             {
-                // המשקל הוא מרחק הצומת ולא משקל הקשת המקורי!
+                // The weight is the distance difference, not the original edge weight!
                 result.addEdge(parent[u], u, distance[u] - distance[parent[u]]);
             }
 
-            // עוברים על כל השכנים של הצומת הנוכחי
+            // Process all neighbors of the current vertex
             Node *neighbor = graph.getHead(u);
             while (neighbor != nullptr)
             {
                 int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם השכן טרם סיומי ויש מסלול קצר יותר דרך צומת u
+                // If the neighbor is not finalized and there's a shorter path through u
                 if (!finalized[v] && distance[u] != INT_MAX &&
                     distance[u] + weight < distance[v])
                 {
-                    // עדכון המרחק
+                    // Update the distance
                     distance[v] = distance[u] + weight;
 
-                    // עדכון ההורה
+                    // Update the parent
                     parent[v] = u;
 
-                    // הוספה לתור העדיפויות
+                    // Add to the priority queue
                     pq.enqueue(v, distance[v]);
                 }
 
-                // ממשיכים לשכן הבא
+                // Move to the next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] distance;
         delete[] finalized;
         delete[] parent;
@@ -555,80 +555,80 @@ namespace graph
 
         int numVertices = graph.getNumVertices();
 
-        // יצירת גרף תוצאה ריק
+        // Create an empty result graph
         Graph result(numVertices);
 
-        // מערך לסימון צמתים שכבר נכללו בעץ
+        // Array to mark vertices already included in MST
         bool *inMST = new bool[numVertices]();
 
-        // מערך המשקלים המינימליים לחיבור כל צומת לעץ
+        // Array of minimum weights to connect each vertex to the tree
         int *key = new int[numVertices];
 
-        // מערך ההורים של כל צומת בעץ הפורש
+        // Array of parents of each vertex in the spanning tree
         int *parent = new int[numVertices];
 
-        // אתחול מערכים
+        // Initialize arrays
         for (int i = 0; i < numVertices; i++)
         {
-            key[i] = INT_MAX; // אינסוף
-            parent[i] = -1;   // אין הורה
+            key[i] = INT_MAX; // Infinity
+            parent[i] = -1;   // No parent
         }
 
-        // נתחיל מהצומת הראשון (0)
-        key[0] = 0; // המשקל לצומת ההתחלה הוא 0
+        // Start with the first vertex (0)
+        key[0] = 0; // Weight to the start vertex is 0
 
-        // תור עדיפויות למציאת הצומת הבא עם המשקל המינימלי
+        // Priority queue to find the next vertex with minimum weight
         PriorityQueue pq;
 
-        // מכניסים את צומת ההתחלה לתור העדיפויות
+        // Add the start vertex to the priority queue
         pq.enqueue(0, 0);
 
-        // כל עוד לא הוספנו את כל הצמתים לעץ
+        // While we haven't added all vertices to the tree
         while (!pq.isEmpty())
         {
-            // מוציאים את הצומת עם המשקל המינימלי
+            // Remove the vertex with minimum weight
             int u = pq.peek();
             pq.dequeue();
 
-            // אם כבר הוספנו צומת זה לעץ, נמשיך
+            // If we've already added this vertex to the tree, continue
             if (inMST[u])
                 continue;
 
-            // מוסיפים את הצומת לעץ
+            // Add the vertex to the tree
             inMST[u] = true;
 
-            // אם יש להורה, מוסיפים את הקשת לגרף התוצאה
+            // If it has a parent, add the edge to the result graph
             if (parent[u] != -1)
             {
                 result.addEdge(u, parent[u], key[u]);
             }
 
-            // עוברים על כל השכנים של הצומת הנוכחי
+            // Process all neighbors of the current vertex
             Node *neighbor = graph.getHead(u);
             while (neighbor != nullptr)
             {
                 int v = neighbor->val;
                 int weight = neighbor->cost;
 
-                // אם השכן עדיין לא בעץ ויש קשת קלה יותר
+                // If the neighbor is not in the tree and there's a lighter edge
                 if (!inMST[v] && weight < key[v])
                 {
-                    // עדכון המשקל
+                    // Update the weight
                     key[v] = weight;
 
-                    // עדכון ההורה
+                    // Update the parent
                     parent[v] = u;
 
-                    // הוספה לתור העדיפויות
+                    // Add to the priority queue
                     pq.enqueue(v, key[v]);
                 }
 
-                // ממשיכים לשכן הבא
+                // Move to the next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] inMST;
         delete[] key;
         delete[] parent;
@@ -657,23 +657,23 @@ namespace graph
 
         int numVertices = graph.getNumVertices();
 
-        // יצירת גרף תוצאה ריק
+        // Create an empty result graph
         Graph result(numVertices);
 
-        // איסוף כל הקשתות מהגרף
-        // במקרה הגרוע יש n(n-1)/2 קשתות בגרף לא מכוון
+        // Collect all edges from the graph
+        // In the worst case, there are n(n-1)/2 edges in an undirected graph
         int maxEdges = numVertices * (numVertices - 1) / 2;
         Edge *edges = new Edge[maxEdges];
         int edgeCount = 0;
 
-        // עוברים על כל הצמתים והקשתות
+        // Iterate through all vertices and edges
         for (int i = 0; i < numVertices; i++)
         {
             Node *neighbor = graph.getHead(i);
             while (neighbor != nullptr)
             {
-                // למנוע כפילויות (כי זה גרף לא מכוון)
-                // נוסיף את הקשת רק אם i < שכן
+                // Prevent duplicates (since this is an undirected graph)
+                // Add the edge only if i < neighbor
                 if (i < neighbor->val)
                 {
                     edges[edgeCount].src = i;
@@ -682,19 +682,19 @@ namespace graph
                     edgeCount++;
                 }
 
-                // ממשיכים לשכן הבא
+                // Move to the next neighbor
                 neighbor = neighbor->next;
             }
         }
 
-        // מיון הקשתות לפי משקל בסדר עולה
+        // Sort edges by weight in ascending order
         for (int i = 0; i < edgeCount - 1; i++)
         {
             for (int j = 0; j < edgeCount - i - 1; j++)
             {
                 if (edges[j].weight > edges[j + 1].weight)
                 {
-                    // החלפה
+                    // Swap
                     Edge temp = edges[j];
                     edges[j] = edges[j + 1];
                     edges[j + 1] = temp;
@@ -702,27 +702,27 @@ namespace graph
             }
         }
 
-        // יצירת מבנה Union-Find
+        // Create Union-Find data structure
         UnionFind uf(numVertices);
 
-        // עוברים על הקשתות בסדר עולה של משקל
+        // Process edges in ascending order of weight
         for (int i = 0; i < edgeCount; i++)
         {
             int src = edges[i].src;
             int dest = edges[i].dest;
 
-            // בודקים אם הקשת יוצרת מעגל
+            // Check if adding this edge creates a cycle
             if (!uf.connected(src, dest))
             {
-                // אם לא, מוסיפים אותה לעץ הפורש המינימלי
+                // If not, add it to the MST
                 result.addEdge(src, dest, edges[i].weight);
 
-                // מאחדים את הקבוצות
+                // Union the sets
                 uf.unionSet(src, dest);
             }
         }
 
-        // שחרור זיכרון
+        // Free memory
         delete[] edges;
 
         return result;
@@ -732,28 +732,28 @@ namespace graph
     // {
     //     int numVertices = graph.getNumVertices();
 
-    //     // יצירת גרף תוצאה ריק
+    //     // Create an empty result graph
     //     Graph result(numVertices);
 
-    //     // מערך לסימון צמתים שכבר ביקרנו בהם
+    //     // Array to mark visited vertices
     //     bool *visited = new bool[numVertices]();
 
-    //     // מבצעים DFS מצומת ההתחלה
+    //     // Perform DFS from the first vertex
     //     dfsUtil(graph, 0, visited, result, -1);
 
-    //     // בדיקה אם כל הצמתים נכללו בעץ
+    //     // Check if all vertices were included in the tree
     //     for (int i = 0; i < numVertices; i++)
     //     {
     //         if (!visited[i])
     //         {
     //             std::cout << "Graph is not connected!" << std::endl;
-    //             // שחרור זיכרון
+    //             // Free memory
     //             delete[] visited;
     //             return false;
     //         }
     //     }
 
-    //     // שחרור זיכרון
+    //     // Free memory
     //     delete[] visited;
 
     //     std::cout << "Graph is connected!" << std::endl;
