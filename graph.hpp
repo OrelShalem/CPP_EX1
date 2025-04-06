@@ -1,5 +1,4 @@
-// 313610123
-
+// orel8155@gmail.com
 /**
  * @file graph.hpp
  * @brief Header file for the Graph implementation and graph algorithms
