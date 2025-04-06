@@ -25,7 +25,8 @@ test: $(TEST_TARGET).cpp $(SRCS) $(HEADERS) doctest.h
 	./$(TEST_TARGET)
 
 # Check for memory leaks with valgrind
-valgrind: $(MAIN_TARGET)
+valgrind: $(MAIN_TARGET).cpp $(SRCS) $(HEADERS)
+	$(CXX) $(CXXFLAGS) -o $(MAIN_TARGET) $(MAIN_TARGET).cpp $(SRCS)
 	valgrind $(VALGRIND_FLAGS) ./$(MAIN_TARGET)
 
 # Check for memory leaks in tests
