@@ -1,37 +1,38 @@
+# 313610123
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind.log
 
-# קבצי מקור
+# Source files
 SRCS = graph.cpp UnionFind.cpp Queue.cpp PriorityQueue.cpp
 HEADERS = graph.hpp UnionFind.hpp Queue.hpp PriorityQueue.hpp
 
-# יעדים
+# Targets
 MAIN_TARGET = main
 TEST_TARGET = test
 
-# פקודת ברירת מחדל
+# Default target
 all: $(MAIN_TARGET)
 
-# קומפילציה והרצה של קובץ ההדגמה
+# Compile and run the demonstration file
 main: $(MAIN_TARGET).cpp $(SRCS) $(HEADERS)
 	$(CXX) $(CXXFLAGS) -o $(MAIN_TARGET) $(MAIN_TARGET).cpp $(SRCS)
 	./$(MAIN_TARGET)
 
-# קומפילציה והרצה של קובץ הבדיקות
+# Compile and run the test file
 test: $(TEST_TARGET).cpp $(SRCS) $(HEADERS) doctest.h
 	$(CXX) $(CXXFLAGS) -o $(TEST_TARGET) $(TEST_TARGET).cpp $(SRCS)
 	./$(TEST_TARGET)
 
-# בדיקת זליגת זיכרון עם valgrind
+# Check for memory leaks with valgrind
 valgrind: $(MAIN_TARGET)
 	valgrind $(VALGRIND_FLAGS) ./$(MAIN_TARGET)
 
-# בדיקת זליגת זיכרון בטסטים
+# Check for memory leaks in tests
 valgrind-test: $(TEST_TARGET)
 	valgrind $(VALGRIND_FLAGS) ./$(TEST_TARGET)
 
-# ניקוי הפרויקט
+# Clean the project
 clean:
 	rm -f $(MAIN_TARGET) $(TEST_TARGET) *.o
 
