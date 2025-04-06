@@ -1,4 +1,4 @@
-# קבצים בינאריים / תוצרי קומפילציה
+# Binary files / Compilation products
 *.o
 *.ko
 *.obj
@@ -9,7 +9,7 @@
 main
 test
 
-# קבצי ספריות
+# Library files
 *.so
 *.dylib
 *.dll
@@ -18,32 +18,32 @@ test
 *.la
 *.lo
 
-# קבצי דיבאג
+# Debug files
 *.dSYM/
 *.su
 core
 *.core
 
-# קבצי IDE ועורכי טקסט
+# IDE and text editor files
 .vscode/
 .idea/
 *.swp
 *~
 .DS_Store
 
-# תיקיות בניה
+# Build directories
 /build/
 /debug/
 /release/
 /bin/
 /obj/
 
-# קבצי valgrind
+# Valgrind files
 vgcore.*
 callgrind.out.*
 cachegrind.out.*
 massif.out.*
 
-# קבצים זמניים שנוצרים בזמן ריצה
+# Temporary files created during runtime
 *.log
 *.tmp 

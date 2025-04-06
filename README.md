@@ -3,7 +3,6 @@
 ## Overview
 This project implements a graph data structure and several standard graph algorithms in C++. It includes Breadth-First Search (BFS), Depth-First Search (DFS), Dijkstra's shortest path algorithm, and Minimum Spanning Tree algorithms (Prim's and Kruskal's).
 
-The implementation uses adjacency lists to represent the graph and prioritizes clarity and educational value over maximum performance.
 
 ## Project Structure
 The project is organized into the following components:
@@ -85,19 +84,4 @@ int main() {
     
     return 0;
 }
-```
-
-## Building and Running
-The project includes a Makefile for easy compilation:
-
-```
-# Compile the main program
-make
-
-# Run the main program
-./main
-
-# Compile and run tests
-make test
-./test
 ```
