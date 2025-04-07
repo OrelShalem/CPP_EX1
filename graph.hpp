@@ -115,7 +115,7 @@ namespace graph
          * @param numVertices Number of vertices in the graph
          * @throws std::invalid_argument If vertex numbers are invalid
          */
-        Graph(Edge edges[], int n, int numVertices);
+        Graph(const Edge edges[], int n, int numVertices);
 
         /**
          * @brief Destructor for the Graph class
@@ -191,7 +191,7 @@ namespace graph
          * @param i Vertex number
          * @throws std::invalid_argument If the vertex number is invalid
          */
-        void print_graph(Node *ptr, int i);
+        void print_graph(const Node *ptr, int i);
     };
 
     /**

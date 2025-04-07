@@ -19,7 +19,7 @@ namespace graph
      * @param n Number of edges in the array
      * @param numVertices Number of vertices in the graph
      */
-    Graph::Graph(Edge edges[], int n, int numVertices) : numVertices(numVertices), numEdges(0)
+    Graph::Graph(const Edge edges[], int n, int numVertices) : numVertices(numVertices), numEdges(0)
     {
         this->head = new Node *[numVertices]();
 
@@ -247,7 +247,7 @@ namespace graph
      * @param i Vertex index
      * @throws std::invalid_argument If the vertex is invalid
      */
-    void Graph::print_graph(Node *ptr, int i)
+    void Graph::print_graph(const Node *ptr, int i)
     {
         if (i >= getNumVertices() || i < 0)
             throw std::invalid_argument("Invalid vertex number!");
